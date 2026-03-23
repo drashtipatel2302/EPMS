@@ -1,0 +1,510 @@
+import React, { useState, useEffect } from 'react';
+import Layout from '../../components/Layout';
+import { Card, SectionHeader, Badge, Button, StatCard, ProgressBar } from '../../components/UI';
+import Loader from '../../components/Loader';
+import api from '../../services/api';
+
+// ─── My Tasks ─────────────────────────────────────────────────────────────────
+export function MyTasks() {
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('all');
+
+  useEffect(() => { api.getTasks().then(t => { setTasks(t); setLoading(false); }); }, []);
+  if (loading) return <Layout><Loader /></Layout>;
+
+  const STATUS_OPTIONS = ['pending', 'in-progress', 'completed'];
+  const filtered = filter === 'all' ? tasks : tasks.filter(t => t.status === filter);
+
+  const updateStatus = (id, status) => setTasks(prev => prev.map(t => t.id === id ? { ...t, status } : t));
+
+  const PRIORITY_COLORS = { high: '#FF6584', medium: '#FFB547', low: '#43E8AC' };
+
+  return (
+    <Layout>
+      <div style={{ maxWidth: 900 }}>
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-primary)' }}>My Tasks</h2>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>View and update your assigned tasks</p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
+          <StatCard label="Total Tasks" value={tasks.length} icon="📋" color="#6C63FF" delay={0.05} />
+          <StatCard label="In Progress" value={tasks.filter(t => t.status === 'in-progress').length} icon="⚡" color="#FFB547" delay={0.10} />
+          <StatCard label="Completed" value={tasks.filter(t => t.status === 'completed').length} icon="✅" color="#43E8AC" delay={0.15} />
+        </div>
+
+        <Card>
+          <SectionHeader title="Task List" subtitle="Update task status as you work" />
+          <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+            {['all','pending','in-progress','completed'].map(f => (
+              <button key={f} onClick={() => setFilter(f)} style={{
+                padding: '6px 16px', borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                textTransform: 'capitalize',
+                background: filter === f ? '#6C63FF' : 'var(--bg-elevated)',
+                color: filter === f ? '#fff' : 'var(--text-secondary)',
+                border: `1px solid ${filter === f ? '#6C63FF' : 'var(--border)'}`,
+              }}>{f === 'all' ? 'All' : f.replace('-', ' ')}</button>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {filtered.map(t => (
+              <div key={t.id} style={{
+                display: 'flex', alignItems: 'center', gap: 14,
+                padding: '14px 16px', borderRadius: 12,
+                background: t.status === 'completed' ? 'rgba(67,232,172,0.04)' : 'var(--bg-elevated)',
+                border: `1px solid ${t.status === 'completed' ? 'rgba(67,232,172,0.2)' : 'var(--border)'}`,
+                opacity: t.status === 'completed' ? 0.75 : 1,
+              }}>
+                <div style={{
+                  width: 10, height: 10, borderRadius: '50%', flexShrink: 0,
+                  background: PRIORITY_COLORS[t.priority],
+                }} />
+                <div style={{ flex: 1 }}>
+                  <div style={{
+                    fontWeight: 500, fontSize: 13, color: 'var(--text-primary)', marginBottom: 2,
+                    textDecoration: t.status === 'completed' ? 'line-through' : 'none',
+                  }}>{t.title}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                    Assigned by {t.assignedBy} · Due {t.due}
+                  </div>
+                </div>
+                <Badge status={t.priority} />
+                <select value={t.status} onChange={e => updateStatus(t.id, e.target.value)} style={{
+                  padding: '6px 12px', background: 'var(--bg-base)', border: '1px solid var(--border)',
+                  borderRadius: 8, color: 'var(--text-primary)', fontSize: 12, outline: 'none', cursor: 'pointer',
+                }}>
+                  {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s.replace('-', ' ')}</option>)}
+                </select>
+              </div>
+            ))}
+            {filtered.length === 0 && (
+              <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)', fontSize: 13 }}>No tasks found.</div>
+            )}
+          </div>
+        </Card>
+      </div>
+    </Layout>
+  );
+}
+
+// ─── Apply Leave ──────────────────────────────────────────────────────────────
+export function ApplyLeave() {
+  const [myLeaves, setMyLeaves] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [form, setForm] = useState({ type: 'Casual Leave', from: '', to: '', reason: '' });
+  const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => { api.getLeaveRequests().then(l => { setMyLeaves(l.slice(0, 2)); setLoading(false); }); }, []);
+  if (loading) return <Layout><Loader /></Layout>;
+
+  const leaveBalance = [
+    { type: 'Annual Leave', total: 21, used: 3, color: '#6C63FF' },
+    { type: 'Sick Leave', total: 12, used: 2, color: '#FF6584' },
+    { type: 'Casual Leave', total: 7, used: 1, color: '#FFB547' },
+  ];
+
+  const handleSubmit = () => {
+    if (form.from && form.to && form.reason) {
+      const days = Math.max(1, Math.round((new Date(form.to) - new Date(form.from)) / 86400000) + 1);
+      setMyLeaves(prev => [{ id: Date.now(), employee: 'Sam Rivera', ...form, days, status: 'pending' }, ...prev]);
+      setForm({ type: 'Casual Leave', from: '', to: '', reason: '' });
+      setSubmitted(true);
+      setTimeout(() => setSubmitted(false), 3000);
+    }
+  };
+
+  const inp = { padding: '9px 12px', background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', fontSize: 13, outline: 'none', width: '100%' };
+
+  return (
+    <Layout>
+      <div style={{ maxWidth: 900 }}>
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-primary)' }}>Leave Application</h2>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>Apply for leave and track your requests</p>
+        </div>
+
+        {/* Leave Balance */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 24 }}>
+          {leaveBalance.map(lb => (
+            <Card key={lb.type} style={{ borderTop: `3px solid ${lb.color}` }}>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>{lb.type}</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
+                <span style={{ fontSize: 26, fontWeight: 400, color: lb.color }}>{lb.total - lb.used}</span>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>of {lb.total} remaining</span>
+              </div>
+              <ProgressBar value={lb.used} max={lb.total} color={lb.color} />
+            </Card>
+          ))}
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+          {/* Apply form */}
+          <Card>
+            <SectionHeader title="Apply for Leave" subtitle="Fill in the details below" />
+            {submitted && (
+              <div style={{ padding: '10px 14px', background: 'rgba(67,232,172,0.1)', border: '1px solid rgba(67,232,172,0.3)', borderRadius: 8, marginBottom: 16, fontSize: 13, color: '#43E8AC', fontWeight: 600 }}>
+                ✓ Leave request submitted successfully!
+              </div>
+            )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>Leave Type</label>
+                <select style={inp} value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}>
+                  {['Annual Leave','Sick Leave','Casual Leave','Maternity Leave','Paternity Leave'].map(t => <option key={t}>{t}</option>)}
+                </select>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>From Date</label>
+                  <input type="date" style={inp} value={form.from} onChange={e => setForm(f => ({ ...f, from: e.target.value }))} />
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>To Date</label>
+                  <input type="date" style={inp} value={form.to} onChange={e => setForm(f => ({ ...f, to: e.target.value }))} />
+                </div>
+              </div>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>Reason</label>
+                <textarea style={{ ...inp, resize: 'vertical' }} rows={3} placeholder="Briefly explain your reason for leave…" value={form.reason} onChange={e => setForm(f => ({ ...f, reason: e.target.value }))} />
+              </div>
+              <Button variant="primary" onClick={handleSubmit}>Submit Request →</Button>
+            </div>
+          </Card>
+
+          {/* My requests */}
+          <Card>
+            <SectionHeader title="My Requests" subtitle="Previous applications" />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {myLeaves.map(l => (
+                <div key={l.id} style={{ padding: '12px 14px', borderRadius: 10, background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                    <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--text-primary)' }}>{l.type}</span>
+                    <Badge status={l.status} />
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{l.from} → {l.to} · {l.days} day{l.days > 1 ? 's' : ''}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2, fontStyle: 'italic' }}>"{l.reason}"</div>
+                </div>
+              ))}
+              {myLeaves.length === 0 && <div style={{ textAlign: 'center', padding: 30, color: 'var(--text-muted)', fontSize: 13 }}>No leave requests yet.</div>}
+            </div>
+          </Card>
+        </div>
+      </div>
+    </Layout>
+  );
+}
+
+// ─── My Attendance ────────────────────────────────────────────────────────────
+export function MyAttendance() {
+  const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [markedToday, setMarkedToday] = useState(false);
+
+  useEffect(() => { api.getAttendance().then(a => { setRecords(a); setLoading(false); }); }, []);
+  if (loading) return <Layout><Loader /></Layout>;
+
+  const present = records.filter(r => r.status === 'present').length;
+  const STATUS_COLORS = { present: '#43E8AC', absent: '#FF6584', late: '#FFB547' };
+
+  return (
+    <Layout>
+      <div style={{ maxWidth: 800 }}>
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-primary)' }}>My Attendance</h2>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>Track your daily check-ins and attendance history</p>
+        </div>
+
+        {/* Today card */}
+        <Card style={{ marginBottom: 20, background: markedToday ? 'rgba(67,232,172,0.05)' : 'var(--bg-surface)', border: markedToday ? '1px solid rgba(67,232,172,0.25)' : '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--text-primary)', marginBottom: 2 }}>
+                {markedToday ? '✅ Checked In Today' : "Today's Attendance"}
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              </div>
+              {markedToday && <div style={{ fontSize: 12, color: '#43E8AC', marginTop: 4, fontWeight: 600 }}>Check-in: {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>}
+            </div>
+            {!markedToday ? (
+              <Button variant="primary" onClick={() => setMarkedToday(true)}>Mark Attendance</Button>
+            ) : (
+              <Button variant="danger" onClick={() => setMarkedToday(false)}>Check Out</Button>
+            )}
+          </div>
+        </Card>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>
+          <StatCard label="Total Days" value={records.length} icon="📅" color="#6C63FF" delay={0.05} />
+          <StatCard label="Present" value={present} icon="✅" color="#43E8AC" delay={0.10} />
+          <StatCard label="Absent" value={records.filter(r => r.status === 'absent').length} icon="❌" color="#FF6584" delay={0.15} />
+          <StatCard label="Attendance %" value={`${Math.round(present / records.length * 100)}%`} icon="📊" color="#FFB547" delay={0.20} />
+        </div>
+
+        <Card>
+          <SectionHeader title="Attendance History" subtitle="February 2024" />
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                {['Date','Check In','Check Out','Hours','Status'].map(h => (
+                  <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.8 }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {records.map(r => (
+                <tr key={r.id} style={{ borderBottom: '1px solid var(--border)' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <td style={{ padding: '11px 14px', fontSize: 13, color: 'var(--text-primary)', fontWeight: 500 }}>{r.date}</td>
+                  <td style={{ padding: '11px 14px', fontSize: 13, color: r.checkIn ? 'var(--text-primary)' : 'var(--text-muted)' }}>{r.checkIn || '—'}</td>
+                  <td style={{ padding: '11px 14px', fontSize: 13, color: r.checkOut ? 'var(--text-primary)' : 'var(--text-muted)' }}>{r.checkOut || '—'}</td>
+                  <td style={{ padding: '11px 14px', fontSize: 13, color: 'var(--text-primary)' }}>{r.hours ? `${r.hours}h` : '—'}</td>
+                  <td style={{ padding: '11px 14px' }}>
+                    <span style={{ padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, textTransform: 'capitalize', background: `${STATUS_COLORS[r.status]}18`, color: STATUS_COLORS[r.status] }}>
+                      {r.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Card>
+      </div>
+    </Layout>
+  );
+}
+
+// ─── My Salary Slips ──────────────────────────────────────────────────────────
+export function MySalarySlips() {
+  const [slips, setSlips] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState(1);
+
+  useEffect(() => { api.getSalarySlips().then(s => { setSlips(s); setLoading(false); }); }, []);
+  if (loading) return <Layout><Loader /></Layout>;
+
+  return (
+    <Layout>
+      <div style={{ maxWidth: 800 }}>
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-primary)' }}>My Salary Slips</h2>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>View and download your monthly payslips</p>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {slips.map(s => (
+            <Card key={s.id}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
+                onClick={() => setExpanded(expanded === s.id ? null : s.id)}>
+                <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(67,232,172,0.12)', border: '1px solid rgba(67,232,172,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>💰</div>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-primary)' }}>{s.month}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Net: <strong style={{ color: '#43E8AC' }}>₹{s.net.toLocaleString()}</strong></div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                  <Badge status={s.status} />
+                  <span style={{ fontSize: 16, color: 'var(--text-muted)' }}>{expanded === s.id ? '▲' : '▼'}</span>
+                </div>
+              </div>
+
+              {expanded === s.id && (
+                <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid var(--border)' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                    <div style={{ background: 'var(--bg-elevated)', borderRadius: 10, padding: '14px' }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>Earnings</div>
+                      {[['Basic Salary', s.basic],['HRA', s.hra],['Allowances', s.allowances]].map(([l, v]) => (
+                        <div key={l} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                          <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{l}</span>
+                          <span style={{ fontSize: 13, fontWeight: 500, color: '#43E8AC' }}>₹{v.toLocaleString()}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ background: 'var(--bg-elevated)', borderRadius: 10, padding: '14px' }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>Deductions</div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                        <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Tax + PF + Others</span>
+                        <span style={{ fontSize: 13, fontWeight: 500, color: '#FF6584' }}>−₹{s.deductions.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px', background: 'rgba(67,232,172,0.06)', borderRadius: 10, border: '1px solid rgba(67,232,172,0.15)', marginBottom: 14 }}>
+                    <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-primary)' }}>Net Take-Home</span>
+                    <span style={{ fontSize: 20, fontWeight: 600, color: '#43E8AC' }}>₹{s.net.toLocaleString()}</span>
+                  </div>
+                  <Button variant="primary" size="sm">Download PDF</Button>
+                </div>
+              )}
+            </Card>
+          ))}
+        </div>
+      </div>
+    </Layout>
+  );
+}
+
+// ─── Announcements (Employee View) ────────────────────────────────────────────
+export function ViewAnnouncements() {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('all');
+
+  useEffect(() => { api.getAnnouncements().then(a => { setItems(a); setLoading(false); }); }, []);
+  if (loading) return <Layout><Loader /></Layout>;
+
+  const CAT_COLORS = { Event: '#6C63FF', Policy: '#FFB547', System: '#43E8AC', HR: '#FF6584' };
+  const filtered = filter === 'all' ? items : items.filter(a => a.category === filter);
+
+  return (
+    <Layout>
+      <div style={{ maxWidth: 800 }}>
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-primary)' }}>Announcements</h2>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>Company-wide news and updates</p>
+        </div>
+
+        <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
+          {['all','Event','Policy','System','HR'].map(f => (
+            <button key={f} onClick={() => setFilter(f)} style={{
+              padding: '6px 16px', borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+              background: filter === f ? (CAT_COLORS[f] || '#6C63FF') : 'var(--bg-elevated)',
+              color: filter === f ? '#fff' : 'var(--text-secondary)',
+              border: `1px solid ${filter === f ? (CAT_COLORS[f] || '#6C63FF') : 'var(--border)'}`,
+              transition: 'all 0.15s',
+            }}>{f}</button>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {filtered.map(a => (
+            <Card key={a.id} style={{ borderLeft: `4px solid ${CAT_COLORS[a.category] || '#6C63FF'}` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <span style={{ padding: '2px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, background: `${CAT_COLORS[a.category]}18`, color: CAT_COLORS[a.category] || '#6C63FF' }}>
+                  {a.category}
+                </span>
+                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{a.date}</span>
+              </div>
+              <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--text-primary)', marginBottom: 6 }}>{a.title}</div>
+              <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{a.body}</div>
+              <div style={{ marginTop: 10, fontSize: 11, color: 'var(--text-muted)' }}>— {a.author}</div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </Layout>
+  );
+}
+
+// ─── Daily Work Report ────────────────────────────────────────────────────────
+export function DailyWorkReport() {
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [form, setForm] = useState({ tasks: '', blockers: '', hoursWorked: 8, mood: 'good' });
+  const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => { api.getDailyReports().then(r => { setReports(r); setLoading(false); }); }, []);
+  if (loading) return <Layout><Loader /></Layout>;
+
+  const today = new Date().toISOString().slice(0, 10);
+  const alreadySubmitted = reports.some(r => r.date === today);
+
+  const MOODS = [
+    { key: 'great', label: '😄 Great', color: '#43E8AC' },
+    { key: 'good', label: '🙂 Good', color: '#6C63FF' },
+    { key: 'neutral', label: '😐 Neutral', color: '#FFB547' },
+    { key: 'rough', label: '😓 Rough', color: '#FF6584' },
+  ];
+
+  const handleSubmit = () => {
+    if (form.tasks) {
+      setReports(prev => [{ id: Date.now(), date: today, ...form }, ...prev]);
+      setForm({ tasks: '', blockers: '', hoursWorked: 8, mood: 'good' });
+      setSubmitted(true);
+      setTimeout(() => setSubmitted(false), 3000);
+    }
+  };
+
+  const inp = { padding: '9px 12px', background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', fontSize: 13, outline: 'none', width: '100%' };
+
+  return (
+    <Layout>
+      <div style={{ maxWidth: 860 }}>
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-primary)' }}>Daily Work Report</h2>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>Submit your end-of-day work summary</p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: 20 }}>
+
+          {/* Submit form */}
+          <Card>
+            <SectionHeader title={`Today's Report`} subtitle={today} />
+
+            {alreadySubmitted && !submitted && (
+              <div style={{ padding: '10px 14px', background: 'rgba(255,181,71,0.1)', border: '1px solid rgba(255,181,71,0.3)', borderRadius: 8, marginBottom: 16, fontSize: 13, color: '#FFB547' }}>
+                ✓ You already submitted a report today.
+              </div>
+            )}
+            {submitted && (
+              <div style={{ padding: '10px 14px', background: 'rgba(67,232,172,0.1)', border: '1px solid rgba(67,232,172,0.3)', borderRadius: 8, marginBottom: 16, fontSize: 13, color: '#43E8AC', fontWeight: 600 }}>
+                ✓ Report submitted successfully!
+              </div>
+            )}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>Tasks Completed *</label>
+                <textarea style={{ ...inp, resize: 'vertical' }} rows={4} placeholder="Describe what you worked on today…" value={form.tasks} onChange={e => setForm(f => ({ ...f, tasks: e.target.value }))} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>Blockers / Issues</label>
+                <textarea style={{ ...inp, resize: 'vertical' }} rows={2} placeholder="Any blockers or challenges? (optional)" value={form.blockers} onChange={e => setForm(f => ({ ...f, blockers: e.target.value }))} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>Hours Worked</label>
+                <input type="number" min={1} max={12} style={inp} value={form.hoursWorked} onChange={e => setForm(f => ({ ...f, hoursWorked: Number(e.target.value) }))} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>How was your day?</label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {MOODS.map(m => (
+                    <button key={m.key} onClick={() => setForm(f => ({ ...f, mood: m.key }))} style={{
+                      flex: 1, padding: '8px 4px', borderRadius: 8, cursor: 'pointer', fontSize: 11, fontWeight: 600,
+                      background: form.mood === m.key ? `${m.color}18` : 'var(--bg-elevated)',
+                      color: form.mood === m.key ? m.color : 'var(--text-muted)',
+                      border: `1px solid ${form.mood === m.key ? m.color : 'var(--border)'}`,
+                      transition: 'all 0.15s',
+                    }}>{m.label}</button>
+                  ))}
+                </div>
+              </div>
+              <Button variant="primary" onClick={handleSubmit}>Submit Report →</Button>
+            </div>
+          </Card>
+
+          {/* History */}
+          <Card>
+            <SectionHeader title="Past Reports" subtitle="Your recent submissions" />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {reports.map(r => (
+                <div key={r.id} style={{ padding: '12px 14px', borderRadius: 10, background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                    <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--text-primary)' }}>{r.date}</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{r.hoursWorked}h worked</span>
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 4 }}>{r.tasks}</div>
+                  {r.blockers && <div style={{ fontSize: 11, color: '#FFB547', fontStyle: 'italic' }}>⚠ {r.blockers}</div>}
+                </div>
+              ))}
+              {reports.length === 0 && <div style={{ textAlign: 'center', padding: 30, color: 'var(--text-muted)', fontSize: 13 }}>No reports yet.</div>}
+            </div>
+          </Card>
+        </div>
+      </div>
+    </Layout>
+  );
+}

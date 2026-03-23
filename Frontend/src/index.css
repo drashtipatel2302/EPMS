@@ -1,0 +1,605 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* ── Core Palette — Clean White ── */
+  --bg-base:        #f5f6fa;
+  --bg-surface:     #ffffff;
+  --bg-elevated:    #f0f1f6;
+  --bg-hover:       #e8eaf2;
+  --bg-card:        #ffffff;
+
+  /* ── Accent ── */
+  --accent:         #4f46e5;
+  --accent-light:   #6366f1;
+  --accent-dim:     rgba(79,70,229,0.10);
+  --accent-glow:    rgba(79,70,229,0.20);
+  --accent-2:       #0ea5e9;
+  --accent-3:       #10b981;
+  --accent-4:       #f43f5e;
+
+  /* ── Role Colors ── */
+  --role-admin:     #4f46e5;
+  --role-manager:   #0ea5e9;
+  --role-employee:  #10b981;
+  --role-hr:        #f43f5e;
+
+  /* ── Text ── */
+  --text-primary:   #0f172a;
+  --text-secondary: #475569;
+  --text-muted:     #94a3b8;
+
+  /* ── Borders ── */
+  --border:         rgba(0,0,0,0.07);
+  --border-med:     rgba(0,0,0,0.12);
+  --border-active:  rgba(79,70,229,0.4);
+
+  /* ── Sizing ── */
+  --sidebar-w:      256px;
+  --r-xs:           4px;
+  --r-sm:           8px;
+  --r-md:           12px;
+  --r-lg:           16px;
+  --r-xl:           24px;
+
+  /* ── Typography ── */
+  --font-display:   'Inter', system-ui, sans-serif;
+  --font-body:      'Inter', system-ui, sans-serif;
+
+  /* ── Shadows ── */
+  --shadow-sm:      0 1px 4px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:      0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+  --shadow-lg:      0 12px 40px rgba(0,0,0,0.12);
+
+  /* ── Legacy aliases ── */
+  --bg:             #f5f6fa;
+  --surface:        #ffffff;
+  --surface2:       #f0f1f6;
+  --surface3:       #e8eaf2;
+  --border2:        rgba(0,0,0,0.12);
+  --accent-hover:   #4338ca;
+  --accent2:        #10b981;
+  --warn:           #f59e0b;
+  --danger:         #f43f5e;
+  --purple:         #8b5cf6;
+  --text:           #0f172a;
+  --text2:          #475569;
+  --muted:          #94a3b8;
+  --radius:         12px;
+  --radius-sm:      8px;
+  --shadow:         0 4px 16px rgba(0,0,0,0.08);
+  --font-head:      'Inter', system-ui, sans-serif;
+}
+
+html, body, #root {
+  height: 100%;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; border: none; background: none; font-family: inherit; }
+input, select, textarea { font-family: inherit; }
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(79,70,229,0.3); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.fade-up    { animation: fadeUp 0.4s cubic-bezier(0.22,1,0.36,1) both; }
+.fade-up-1  { animation-delay: 0.06s; }
+.fade-up-2  { animation-delay: 0.12s; }
+.fade-up-3  { animation-delay: 0.18s; }
+.fade-up-4  { animation-delay: 0.24s; }
+.fade-up-5  { animation-delay: 0.30s; }
+.page-enter { animation: fadeIn 0.3s ease both; }
+
+input, select, textarea {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-med);
+  border-radius: var(--r-sm);
+  color: var(--text-primary);
+  padding: 9px 12px;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+input::placeholder, textarea::placeholder { color: var(--text-muted); }
+select option { background: var(--bg-surface); color: var(--text-primary); }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   EPMS ANIMATION SYSTEM
+   Employee Performance Management System — Motion Design
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. KEYFRAMES ─────────────────────────────────────────────────────── */
+
+@keyframes epms-fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes epms-fadeDown {
+  from { opacity: 0; transform: translateY(-16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes epms-fadeLeft {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes epms-fadeRight {
+  from { opacity: 0; transform: translateX(-24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes epms-scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes epms-scaleUp {
+  from { opacity: 0; transform: scale(0.85) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes epms-slideInLeft {
+  from { opacity: 0; transform: translateX(-100%); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* KPI counter roll-up */
+@keyframes epms-countUp {
+  from { opacity: 0; transform: translateY(14px) scale(0.9); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Progress bar fill */
+@keyframes epms-barFill {
+  from { width: 0 !important; }
+}
+
+/* Shimmer skeleton loader */
+@keyframes epms-shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+
+/* Subtle float for hero elements */
+@keyframes epms-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-6px); }
+}
+
+/* Pulse ring — for status indicators / alerts */
+@keyframes epms-pulseRing {
+  0%   { transform: scale(1);    opacity: 0.7; }
+  70%  { transform: scale(2.2);  opacity: 0; }
+  100% { transform: scale(2.2);  opacity: 0; }
+}
+
+/* Notification badge bounce */
+@keyframes epms-badgeBounce {
+  0%, 100% { transform: scale(1); }
+  30%       { transform: scale(1.35); }
+  60%       { transform: scale(0.9); }
+}
+
+/* Spin (reuse for loaders) */
+@keyframes epms-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Gradient shift for banners */
+@keyframes epms-gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Typewriter cursor blink */
+@keyframes epms-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* Card hover lift */
+@keyframes epms-liftIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Checkmark draw */
+@keyframes epms-checkDraw {
+  from { stroke-dashoffset: 50; }
+  to   { stroke-dashoffset: 0; }
+}
+
+/* ── 2. PAGE & SECTION ENTER UTILITIES ───────────────────────────────── */
+
+.epms-page {
+  animation: epms-fadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Staggered children — add .epms-stagger to parent */
+.epms-stagger > * {
+  animation: epms-fadeUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.epms-stagger > *:nth-child(1)  { animation-delay: 0.04s; }
+.epms-stagger > *:nth-child(2)  { animation-delay: 0.09s; }
+.epms-stagger > *:nth-child(3)  { animation-delay: 0.14s; }
+.epms-stagger > *:nth-child(4)  { animation-delay: 0.19s; }
+.epms-stagger > *:nth-child(5)  { animation-delay: 0.24s; }
+.epms-stagger > *:nth-child(6)  { animation-delay: 0.29s; }
+.epms-stagger > *:nth-child(7)  { animation-delay: 0.34s; }
+.epms-stagger > *:nth-child(8)  { animation-delay: 0.39s; }
+.epms-stagger > *:nth-child(9)  { animation-delay: 0.44s; }
+.epms-stagger > *:nth-child(10) { animation-delay: 0.49s; }
+.epms-stagger > *:nth-child(11) { animation-delay: 0.54s; }
+.epms-stagger > *:nth-child(12) { animation-delay: 0.59s; }
+
+.epms-fade-up    { animation: epms-fadeUp    0.4s cubic-bezier(0.22,1,0.36,1) both; }
+.epms-fade-down  { animation: epms-fadeDown  0.4s cubic-bezier(0.22,1,0.36,1) both; }
+.epms-fade-left  { animation: epms-fadeLeft  0.4s cubic-bezier(0.22,1,0.36,1) both; }
+.epms-fade-right { animation: epms-fadeRight 0.4s cubic-bezier(0.22,1,0.36,1) both; }
+.epms-scale-in   { animation: epms-scaleIn   0.35s cubic-bezier(0.22,1,0.36,1) both; }
+.epms-scale-up   { animation: epms-scaleUp   0.4s  cubic-bezier(0.22,1,0.36,1) both; }
+.epms-lift-in    { animation: epms-liftIn    0.4s  cubic-bezier(0.22,1,0.36,1) both; }
+.epms-count-up   { animation: epms-countUp   0.5s  cubic-bezier(0.22,1,0.36,1) both; }
+.epms-sidebar-in { animation: epms-slideInLeft 0.4s cubic-bezier(0.22,1,0.36,1) both; }
+
+/* Delay helpers */
+.epms-d1  { animation-delay: 0.06s; }
+.epms-d2  { animation-delay: 0.12s; }
+.epms-d3  { animation-delay: 0.18s; }
+.epms-d4  { animation-delay: 0.24s; }
+.epms-d5  { animation-delay: 0.30s; }
+.epms-d6  { animation-delay: 0.36s; }
+.epms-d7  { animation-delay: 0.42s; }
+.epms-d8  { animation-delay: 0.48s; }
+
+/* ── 3. INTERACTIVE CARD HOVER SYSTEM ────────────────────────────────── */
+
+.epms-card {
+  transition:
+    transform   0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow  0.22s ease,
+    border-color 0.22s ease;
+  will-change: transform;
+}
+.epms-card:hover {
+  transform:    translateY(-3px) scale(1.012);
+  box-shadow:   0 12px 36px rgba(79, 70, 229, 0.13), 0 4px 12px rgba(0,0,0,0.07);
+}
+
+/* Stat card variant — bolder lift */
+.epms-stat-card {
+  transition:
+    transform    0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow   0.25s ease,
+    border-color 0.25s ease;
+  will-change: transform;
+  cursor: default;
+}
+.epms-stat-card:hover {
+  transform:   translateY(-5px) scale(1.025);
+  box-shadow:  0 16px 48px rgba(79, 70, 229, 0.16), 0 6px 16px rgba(0,0,0,0.08);
+}
+
+/* Quick-action card */
+.epms-action-card {
+  transition:
+    transform    0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow   0.2s ease,
+    background   0.15s ease;
+  cursor: pointer;
+  will-change: transform;
+}
+.epms-action-card:hover {
+  transform:  translateY(-4px) scale(1.03);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.1);
+}
+.epms-action-card:active {
+  transform: translateY(-1px) scale(0.99);
+}
+
+/* Table row hover */
+.epms-table-row {
+  transition: background 0.13s ease, transform 0.13s ease;
+}
+.epms-table-row:hover {
+  background: var(--bg-elevated) !important;
+  transform: translateX(3px);
+}
+
+/* ── 4. BUTTON ANIMATIONS ────────────────────────────────────────────── */
+
+.epms-btn {
+  transition:
+    background   0.15s ease,
+    transform    0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow   0.15s ease,
+    opacity      0.15s ease;
+  will-change: transform;
+}
+.epms-btn:hover:not(:disabled) {
+  transform:   translateY(-2px);
+  box-shadow:  0 6px 20px rgba(79, 70, 229, 0.3);
+}
+.epms-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+}
+
+.epms-btn-danger:hover:not(:disabled) {
+  box-shadow: 0 6px 20px rgba(244, 63, 94, 0.3) !important;
+}
+.epms-btn-success:hover:not(:disabled) {
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3) !important;
+}
+
+/* Icon-only button spin on hover */
+.epms-icon-btn {
+  transition: transform 0.2s ease, background 0.15s ease;
+}
+.epms-icon-btn:hover { transform: rotate(15deg) scale(1.1); }
+
+/* ── 5. SIDEBAR ANIMATIONS ───────────────────────────────────────────── */
+
+/* Sidebar nav link */
+.epms-nav-link {
+  transition:
+    background    0.15s ease,
+    color         0.15s ease,
+    border-color  0.15s ease,
+    transform     0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+    padding-left  0.15s ease;
+}
+.epms-nav-link:hover {
+  transform: translateX(3px);
+}
+
+/* Sidebar collapse toggle */
+.epms-sidebar-toggle {
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease;
+}
+.epms-sidebar-toggle:hover { transform: scale(1.15); }
+
+/* ── 6. NAVBAR / DROPDOWN ANIMATIONS ─────────────────────────────────── */
+
+.epms-navbar-btn {
+  transition: background 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+}
+.epms-navbar-btn:hover { transform: scale(1.05); }
+
+/* Dropdown panels */
+.epms-dropdown {
+  animation: epms-scaleUp 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: top right;
+}
+
+/* Notification badge */
+.epms-badge {
+  animation: epms-badgeBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* ── 7. MODAL / OVERLAY ───────────────────────────────────────────────── */
+
+.epms-overlay {
+  animation: epms-fadeUp 0.15s ease both;
+}
+.epms-modal {
+  animation: epms-scaleUp 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.epms-modal-close {
+  transition: transform 0.2s ease, color 0.15s ease;
+}
+.epms-modal-close:hover { transform: rotate(90deg) scale(1.1); }
+
+/* ── 8. FORM ELEMENT ANIMATIONS ─────────────────────────────────────────*/
+
+.epms-input {
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+.epms-input:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12) !important;
+  background: #fff !important;
+}
+
+.epms-label {
+  transition: color 0.15s ease;
+}
+
+/* OTP box pop */
+.epms-otp-box {
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease, transform 0.15s cubic-bezier(0.34,1.56,0.64,1);
+}
+.epms-otp-box:focus { transform: scale(1.08); }
+
+/* ── 9. PROGRESS BAR & KPI ANIMATIONS ───────────────────────────────── */
+
+.epms-progress-bar {
+  animation: epms-barFill 1.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.epms-progress-bar-slow {
+  animation: epms-barFill 1.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Sparkline draw-in */
+.epms-sparkline {
+  animation: epms-fadeRight 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Donut chart pop */
+.epms-donut {
+  animation: epms-scaleIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── 10. SKELETON / LOADING SHIMMER ──────────────────────────────────── */
+
+.epms-skeleton {
+  background: linear-gradient(90deg, #f0f1f6 25%, #e4e6ef 50%, #f0f1f6 75%);
+  background-size: 600px 100%;
+  animation: epms-shimmer 1.6s infinite linear;
+  border-radius: 8px;
+}
+.epms-skeleton-text  { height: 12px; border-radius: 6px; margin-bottom: 8px; }
+.epms-skeleton-title { height: 20px; border-radius: 6px; margin-bottom: 12px; width: 60%; }
+.epms-skeleton-card  { height: 100px; border-radius: 12px; }
+.epms-skeleton-avatar{ width: 40px; height: 40px; border-radius: 50%; }
+
+/* ── 11. STATUS / BADGE ANIMATIONS ──────────────────────────────────── */
+
+/* Active status pulse ring */
+.epms-status-active {
+  position: relative;
+  display: inline-block;
+}
+.epms-status-active::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--accent-3);
+  animation: epms-pulseRing 2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+/* Role badge entrance */
+.epms-role-badge {
+  animation: epms-scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.epms-role-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+}
+
+/* ── 12. TOAST / ALERT ANIMATIONS ───────────────────────────────────── */
+
+.epms-toast {
+  animation: epms-fadeLeft 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.epms-toast-exit {
+  animation: epms-fadeLeft 0.25s cubic-bezier(0.22, 1, 0.36, 1) reverse both;
+}
+.epms-alert {
+  animation: epms-fadeDown 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── 13. TABLE ANIMATIONS ────────────────────────────────────────────── */
+
+.epms-table-body tr {
+  animation: epms-fadeRight 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.epms-table-body tr:nth-child(1)  { animation-delay: 0.03s; }
+.epms-table-body tr:nth-child(2)  { animation-delay: 0.07s; }
+.epms-table-body tr:nth-child(3)  { animation-delay: 0.11s; }
+.epms-table-body tr:nth-child(4)  { animation-delay: 0.15s; }
+.epms-table-body tr:nth-child(5)  { animation-delay: 0.19s; }
+.epms-table-body tr:nth-child(6)  { animation-delay: 0.23s; }
+.epms-table-body tr:nth-child(7)  { animation-delay: 0.27s; }
+.epms-table-body tr:nth-child(8)  { animation-delay: 0.31s; }
+.epms-table-body tr:nth-child(9)  { animation-delay: 0.35s; }
+.epms-table-body tr:nth-child(10) { animation-delay: 0.39s; }
+
+/* ── 14. LOGIN PAGE SPECIAL ANIMATIONS ──────────────────────────────── */
+
+/* Animated gradient background for left hero panel */
+.epms-hero-bg {
+  background-size: 200% 200%;
+  animation: epms-gradientShift 8s ease infinite;
+}
+
+/* Floating stat cards on login hero */
+.epms-hero-stat {
+  animation: epms-float 4s ease-in-out infinite;
+}
+.epms-hero-stat:nth-child(2) { animation-delay: 0.8s; }
+.epms-hero-stat:nth-child(3) { animation-delay: 1.6s; }
+
+/* ── 15. PERFORMANCE / APPRAISAL SPECIFIC ────────────────────────────── */
+
+/* Rating star fill */
+.epms-star {
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.15s ease;
+}
+.epms-star:hover { transform: scale(1.3) rotate(-5deg); }
+
+/* Score circle grow */
+.epms-score-ring {
+  animation: epms-scaleIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+
+/* Rank/badge reveal */
+.epms-rank-badge {
+  animation: epms-countUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── 16. DASHBOARD WELCOME BANNER ────────────────────────────────────── */
+
+.epms-banner {
+  animation: epms-fadeRight 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  position: relative;
+  overflow: hidden;
+}
+.epms-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 60%, rgba(255,255,255,0.06) 100%);
+  animation: epms-gradientShift 6s ease infinite;
+  background-size: 200% 100%;
+  pointer-events: none;
+}
+
+/* ── 17. GLOBAL SMOOTH TRANSITIONS ──────────────────────────────────── */
+
+/* All interactive elements get smooth defaults */
+a, button {
+  transition: color 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+}
+
+/* NavLink active indicator slide */
+.epms-nav-indicator {
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
+}
+
+/* Sidebar width collapse */
+aside {
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Smooth page content area */
+main {
+  transition: padding 0.3s ease;
+}
+
+/* ── 18. REDUCED MOTION SUPPORT ──────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

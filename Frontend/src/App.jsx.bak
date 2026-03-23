@@ -1,0 +1,78 @@
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import './index.css';
+
+// Auth
+import Login from './pages/auth/Login';
+import ForgotPassword from './pages/auth/ForgotPassword';
+
+// Admin
+import AdminDashboard from './pages/admin/Dashboard';
+import Users from './pages/admin/Users';
+import Departments from './pages/admin/Departments';
+import KPI from './pages/admin/KPI';
+import Reports from './pages/admin/Reports';
+
+// Manager
+import ManagerDashboard from './pages/manager/Dashboard';
+import Team from './pages/manager/Team';
+import { AssignGoals, Reviews } from './pages/manager/AssignGoals_Reviews';
+
+// Employee
+import EmployeeDashboard from './pages/employee/Dashboard';
+import { Goals, SelfReview, History } from './pages/employee/Goals_SelfReview_History';
+
+// HR
+import { HRDashboard, Appraisal, Promotions } from './pages/hr/HR_Pages';
+
+// Guard
+import ProtectedRoute from './components/ProtectedRoute';
+
+function RootRedirect() {
+  const { user, isAuthenticated } = useAuth();
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  return <Navigate to={`/${user.role}/dashboard`} replace />;
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Public */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/" element={<RootRedirect />} />
+
+          {/* Admin Routes */}
+          <Route path="/admin/dashboard"   element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin/users"       element={<ProtectedRoute allowedRoles={['admin']}><Users /></ProtectedRoute>} />
+          <Route path="/admin/departments" element={<ProtectedRoute allowedRoles={['admin']}><Departments /></ProtectedRoute>} />
+          <Route path="/admin/kpi"         element={<ProtectedRoute allowedRoles={['admin']}><KPI /></ProtectedRoute>} />
+          <Route path="/admin/reports"     element={<ProtectedRoute allowedRoles={['admin']}><Reports /></ProtectedRoute>} />
+
+          {/* Manager Routes */}
+          <Route path="/manager/dashboard"    element={<ProtectedRoute allowedRoles={['manager']}><ManagerDashboard /></ProtectedRoute>} />
+          <Route path="/manager/team"         element={<ProtectedRoute allowedRoles={['manager']}><Team /></ProtectedRoute>} />
+          <Route path="/manager/assign-goals" element={<ProtectedRoute allowedRoles={['manager']}><AssignGoals /></ProtectedRoute>} />
+          <Route path="/manager/reviews"      element={<ProtectedRoute allowedRoles={['manager']}><Reviews /></ProtectedRoute>} />
+
+          {/* Employee Routes */}
+          <Route path="/employee/dashboard"   element={<ProtectedRoute allowedRoles={['employee']}><EmployeeDashboard /></ProtectedRoute>} />
+          <Route path="/employee/goals"       element={<ProtectedRoute allowedRoles={['employee']}><Goals /></ProtectedRoute>} />
+          <Route path="/employee/self-review" element={<ProtectedRoute allowedRoles={['employee']}><SelfReview /></ProtectedRoute>} />
+          <Route path="/employee/history"     element={<ProtectedRoute allowedRoles={['employee']}><History /></ProtectedRoute>} />
+
+          {/* HR Routes */}
+          <Route path="/hr/dashboard"  element={<ProtectedRoute allowedRoles={['hr']}><HRDashboard /></ProtectedRoute>} />
+          <Route path="/hr/appraisal"  element={<ProtectedRoute allowedRoles={['hr']}><Appraisal /></ProtectedRoute>} />
+          <Route path="/hr/promotions" element={<ProtectedRoute allowedRoles={['hr']}><Promotions /></ProtectedRoute>} />
+
+          {/* Catch-all */}
+          <Route path="*" element={<RootRedirect />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}

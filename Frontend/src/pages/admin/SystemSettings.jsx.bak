@@ -1,0 +1,230 @@
+import React, { useState, useEffect } from 'react';
+import Layout from '../../components/Layout';
+import { Card, SectionHeader, Button } from '../../components/UI';
+import Loader from '../../components/Loader';
+
+const DEFAULT_SETTINGS = {
+  workingHours: { start: '09:00', end: '18:00', workDays: ['Mon','Tue','Wed','Thu','Fri'] },
+  ratingScale: { min: 1, max: 5, labels: ['Needs Improvement','Below Expectations','Meets Expectations','Exceeds Expectations','Outstanding'] },
+  performanceCriteria: [
+    { id: 1, name: 'Goal Achievement', weight: 40 },
+    { id: 2, name: 'Work Quality',     weight: 25 },
+    { id: 3, name: 'Collaboration',    weight: 20 },
+    { id: 4, name: 'Learning & Growth',weight: 15 },
+  ],
+  reviewCycle: 'Quarterly',
+  lateThresholdMins: 15,
+};
+
+const INP = (extra={}) => ({ padding:'9px 12px', background:'var(--bg-elevated)', border:'1px solid var(--border)', borderRadius:8, color:'var(--text-primary)', fontSize:13, outline:'none', ...extra });
+
+function SaveBtn({ section, saved, onSave }) {
+  const active = saved===section;
+  return (
+    <button onClick={()=>onSave(section)} style={{ padding:'8px 20px',borderRadius:8,border:'none',background:active?'#43E8AC':'linear-gradient(90deg,#6C63FF,#8B85FF)',color:'#fff',fontWeight:700,fontSize:13,cursor:'pointer',transition:'all .3s' }}>
+      {active?'✓ Saved!':'Save Changes'}
+    </button>
+  );
+}
+
+export default function SystemSettings() {
+  const [settings, setSettings] = useState(null);
+  const [saved,    setSaved]    = useState('');
+  const [tab,      setTab]      = useState('hours');
+
+  useEffect(() => { setSettings(DEFAULT_SETTINGS); }, []);
+  if (!settings) return <Layout><Loader/></Layout>;
+
+  const handleSave = section => {
+    setSaved(section);
+    setTimeout(()=>setSaved(''),2500);
+  };
+
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+  const Tab = ({label,k}) => (
+    <button onClick={()=>setTab(k)} style={{ padding:'9px 20px',borderRadius:9,fontSize:13,fontWeight:600,cursor:'pointer',background:tab===k?'#6C63FF':'var(--bg-elevated)',color:tab===k?'#fff':'var(--text-secondary)',border:tab===k?'none':'1px solid var(--border)',transition:'all .15s' }}>{label}</button>
+  );
+
+  return (
+    <Layout>
+      <div style={{ maxWidth:920 }}>
+        <div style={{ marginBottom:22 }}>
+          <div style={{ fontSize:24,fontWeight:800,color:'var(--text-primary)',marginBottom:4 }}>System Settings</div>
+          <div style={{ fontSize:13,color:'var(--text-secondary)' }}>Configure company-wide performance rules, working hours, and security policies</div>
+        </div>
+
+        <div style={{ display:'flex',gap:8,marginBottom:24,flexWrap:'wrap' }}>
+          <Tab label="⏰ Working Hours"    k="hours"    />
+          <Tab label="📊 Performance"      k="perf"     />
+          <Tab label="⭐ Rating Scale"     k="rating"   />
+          <Tab label="🔄 Review Cycle"     k="cycle"    />
+          <Tab label="🛡️ Backup & Security" k="security" />
+        </div>
+
+        {/* ── WORKING HOURS ── */}
+        {tab==='hours' && (
+          <Card>
+            <SectionHeader title="⏰ Working Hours" subtitle="Define office working schedule and attendance thresholds"/>
+            <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:16,marginBottom:18 }}>
+              <div>
+                <label style={{ fontSize:12,fontWeight:700,color:'var(--text-secondary)',display:'block',marginBottom:6 }}>Office Start Time</label>
+                <input type="time" value={settings.workingHours.start} onChange={e=>setSettings(s=>({...s,workingHours:{...s.workingHours,start:e.target.value}}))} style={INP({width:'100%'})}/>
+              </div>
+              <div>
+                <label style={{ fontSize:12,fontWeight:700,color:'var(--text-secondary)',display:'block',marginBottom:6 }}>Office End Time</label>
+                <input type="time" value={settings.workingHours.end} onChange={e=>setSettings(s=>({...s,workingHours:{...s.workingHours,end:e.target.value}}))} style={INP({width:'100%'})}/>
+              </div>
+              <div>
+                <label style={{ fontSize:12,fontWeight:700,color:'var(--text-secondary)',display:'block',marginBottom:6 }}>Late Threshold (minutes)</label>
+                <input type="number" min={0} value={settings.lateThresholdMins} onChange={e=>setSettings(s=>({...s,lateThresholdMins:Number(e.target.value)}))} style={INP({width:'100%'})}/>
+              </div>
+            </div>
+            <div style={{ marginBottom:18 }}>
+              <label style={{ fontSize:12,fontWeight:700,color:'var(--text-secondary)',display:'block',marginBottom:10 }}>Working Days</label>
+              <div style={{ display:'flex',gap:8,flexWrap:'wrap' }}>
+                {days.map(d=>{
+                  const active = settings.workingHours.workDays.includes(d);
+                  return (
+                    <button key={d} onClick={()=>setSettings(s=>({...s,workingHours:{...s.workingHours,workDays:active?s.workingHours.workDays.filter(x=>x!==d):[...s.workingHours.workDays,d]}}))} style={{ padding:'8px 16px',borderRadius:20,fontSize:12,fontWeight:700,cursor:'pointer',background:active?'#6C63FF':'var(--bg-elevated)',color:active?'#fff':'var(--text-secondary)',border:`1px solid ${active?'#6C63FF':'var(--border)'}`,transition:'all .15s' }}>{d}</button>
+                  );
+                })}
+              </div>
+            </div>
+            <div style={{ padding:14,background:'rgba(108,99,255,0.07)',borderRadius:10,border:'1px solid rgba(108,99,255,0.2)',marginBottom:18,fontSize:13,color:'var(--text-secondary)' }}>
+              💡 <strong>Attendance auto-capture:</strong> Employees are marked LATE if they log in more than {settings.lateThresholdMins} minutes after {settings.workingHours.start}. Login and logout times are automatically recorded.
+            </div>
+            <SaveBtn section="hours" saved={saved} onSave={handleSave}/>
+          </Card>
+        )}
+
+        {/* ── PERFORMANCE ── */}
+        {tab==='perf' && (
+          <Card>
+            <SectionHeader title="📊 Performance Criteria" subtitle="Set evaluation categories and their weightage (must total 100%)"/>
+            <div style={{ marginBottom:18 }}>
+              {settings.performanceCriteria.map((c,i)=>(
+                <div key={c.id} style={{ display:'flex',alignItems:'center',gap:14,marginBottom:14 }}>
+                  <input value={c.name} onChange={e=>{ const u=[...settings.performanceCriteria]; u[i]={...c,name:e.target.value}; setSettings(s=>({...s,performanceCriteria:u})); }} style={{ ...INP(),flex:1,fontWeight:600 }}/>
+                  <div style={{ display:'flex',alignItems:'center',gap:6 }}>
+                    <input type="number" value={c.weight} min={0} max={100} onChange={e=>{ const u=[...settings.performanceCriteria]; u[i]={...c,weight:Number(e.target.value)}; setSettings(s=>({...s,performanceCriteria:u})); }} style={INP({width:72,textAlign:'center'})}/>
+                    <span style={{ fontSize:13,color:'var(--text-muted)' }}>%</span>
+                  </div>
+                  <div style={{ width:110,height:7,background:'var(--bg-elevated)',borderRadius:6,overflow:'hidden' }}>
+                    <div style={{ height:'100%',width:`${c.weight}%`,background:'linear-gradient(90deg,#6C63FF,#8B85FF)',borderRadius:6,transition:'width .3s' }}/>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center' }}>
+              <span style={{ fontSize:13,fontWeight:700,color:settings.performanceCriteria.reduce((s,c)=>s+c.weight,0)===100?'#43E8AC':'#FF6584' }}>
+                Total: {settings.performanceCriteria.reduce((s,c)=>s+c.weight,0)}%
+                {settings.performanceCriteria.reduce((s,c)=>s+c.weight,0)!==100&&<span style={{ fontWeight:400,fontSize:11,marginLeft:6 }}>⚠ Must equal 100%</span>}
+              </span>
+              <SaveBtn section="perf" saved={saved} onSave={handleSave}/>
+            </div>
+          </Card>
+        )}
+
+        {/* ── RATING ── */}
+        {tab==='rating' && (
+          <Card>
+            <SectionHeader title="⭐ Rating Scale" subtitle="Define what each rating score means for employees"/>
+            <div style={{ marginBottom:18 }}>
+              {settings.ratingScale.labels.map((label,i)=>(
+                <div key={i} style={{ display:'flex',alignItems:'center',gap:14,marginBottom:12 }}>
+                  <div style={{ width:40,height:40,borderRadius:10,background:'rgba(255,181,71,0.15)',border:'1px solid rgba(255,181,71,0.3)',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:16,color:'#FFB547',flexShrink:0 }}>{i+1}</div>
+                  <input value={label} onChange={e=>{ const ls=[...settings.ratingScale.labels]; ls[i]=e.target.value; setSettings(s=>({...s,ratingScale:{...s.ratingScale,labels:ls}})); }} style={{ ...INP(),flex:1 }}/>
+                  <div style={{ display:'flex',gap:2 }}>{'⭐'.repeat(i+1)}</div>
+                </div>
+              ))}
+            </div>
+            <SaveBtn section="rating" saved={saved} onSave={handleSave}/>
+          </Card>
+        )}
+
+        {/* ── REVIEW CYCLE ── */}
+        {tab==='cycle' && (
+          <Card>
+            <SectionHeader title="🔄 Review Cycle" subtitle="How frequently performance reviews are conducted across the organisation"/>
+            <div style={{ display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:12,marginBottom:18 }}>
+              {[
+                { value:'Monthly',     desc:'Review every month',         icon:'📅' },
+                { value:'Quarterly',   desc:'Review every 3 months',      icon:'📆' },
+                { value:'Half-yearly', desc:'Review every 6 months',      icon:'🗓️' },
+                { value:'Annually',    desc:'Review once per year',       icon:'📋' },
+              ].map(opt=>{
+                const active = settings.reviewCycle===opt.value;
+                return (
+                  <button key={opt.value} onClick={()=>setSettings(s=>({...s,reviewCycle:opt.value}))} style={{ padding:'16px 18px',borderRadius:12,cursor:'pointer',background:active?'rgba(108,99,255,0.12)':'var(--bg-elevated)',border:active?'2px solid #6C63FF':'1px solid var(--border)',textAlign:'left',transition:'all .15s' }}>
+                    <div style={{ fontSize:24,marginBottom:6 }}>{opt.icon}</div>
+                    <div style={{ fontSize:14,fontWeight:700,color:active?'#6C63FF':'var(--text-primary)' }}>{opt.value}</div>
+                    <div style={{ fontSize:12,color:'var(--text-muted)',marginTop:2 }}>{opt.desc}</div>
+                  </button>
+                );
+              })}
+            </div>
+            <SaveBtn section="cycle" saved={saved} onSave={handleSave}/>
+          </Card>
+        )}
+
+        {/* ── BACKUP & SECURITY ── */}
+        {tab==='security' && (
+          <div style={{ display:'flex',flexDirection:'column',gap:18 }}>
+            <Card>
+              <SectionHeader title="🛡️ Security Settings" subtitle="Authentication and access control configuration"/>
+              <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:18 }}>
+                {[
+                  { label:'Session Timeout (minutes)',   val:'30',   type:'number' },
+                  { label:'Max Login Attempts',          val:'5',    type:'number' },
+                  { label:'Password Min Length',         val:'6',    type:'number' },
+                  { label:'Token Expiry (hours)',        val:'24',   type:'number' },
+                ].map(f=>(
+                  <div key={f.label}>
+                    <label style={{ fontSize:12,fontWeight:700,color:'var(--text-secondary)',display:'block',marginBottom:6 }}>{f.label}</label>
+                    <input type={f.type} defaultValue={f.val} style={INP({width:'100%'})}/>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display:'flex',gap:10,marginBottom:16 }}>
+                {[
+                  { label:'Force 2FA for Admins',   checked:true  },
+                  { label:'IP Whitelist Enabled',   checked:false },
+                  { label:'Audit Logging Active',   checked:true  },
+                ].map(f=>(
+                  <label key={f.label} style={{ display:'flex',alignItems:'center',gap:8,cursor:'pointer',padding:'8px 14px',background:'var(--bg-elevated)',borderRadius:9,border:'1px solid var(--border)',fontSize:13,color:'var(--text-secondary)',fontWeight:500 }}>
+                    <input type="checkbox" defaultChecked={f.checked}/> {f.label}
+                  </label>
+                ))}
+              </div>
+              <SaveBtn section="security" saved={saved} onSave={handleSave}/>
+            </Card>
+
+            <Card>
+              <SectionHeader title="💾 Backup Management" subtitle="System data backup and restore"/>
+              <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:18 }}>
+                {[
+                  { label:'Last Backup',    val:'Feb 26, 2025 · 02:00 AM',  color:'#43E8AC', icon:'✅' },
+                  { label:'Backup Size',    val:'142 MB',                    color:'#6C63FF', icon:'💾' },
+                  { label:'Auto Backup',    val:'Daily at 2:00 AM',          color:'#FFB547', icon:'🔄' },
+                  { label:'Retention',      val:'30 days',                   color:'#FF6584', icon:'📅' },
+                ].map(s=>(
+                  <div key={s.label} style={{ padding:'12px 14px',background:'var(--bg-elevated)',borderRadius:10,border:`1px solid ${s.color}20` }}>
+                    <div style={{ fontSize:20,marginBottom:4 }}>{s.icon}</div>
+                    <div style={{ fontSize:11,color:'var(--text-muted)' }}>{s.label}</div>
+                    <div style={{ fontSize:13,fontWeight:700,color:s.color,marginTop:2 }}>{s.val}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display:'flex',gap:10 }}>
+                <button style={{ padding:'9px 20px',borderRadius:9,border:'1px solid rgba(108,99,255,0.4)',background:'rgba(108,99,255,0.1)',color:'#6C63FF',fontWeight:700,fontSize:13,cursor:'pointer' }}>💾 Backup Now</button>
+                <button style={{ padding:'9px 20px',borderRadius:9,border:'1px solid rgba(255,181,71,0.4)',background:'rgba(255,181,71,0.1)',color:'#FFB547',fontWeight:700,fontSize:13,cursor:'pointer' }}>↩️ Restore Backup</button>
+                <button style={{ padding:'9px 20px',borderRadius:9,border:'1px solid rgba(67,232,172,0.4)',background:'rgba(67,232,172,0.1)',color:'#43E8AC',fontWeight:700,fontSize:13,cursor:'pointer' }}>📥 Download Backup</button>
+              </div>
+            </Card>
+          </div>
+        )}
+      </div>
+    </Layout>
+  );
+}
