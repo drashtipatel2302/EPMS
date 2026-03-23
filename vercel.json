@@ -1,6 +1,6 @@
 {
-  "buildCommand": "npm install --legacy-peer-deps && npm run build",
-  "outputDirectory": "dist",
+  "buildCommand": "cd Frontend && npm install --force && chmod -R 755 node_modules/.bin && npm run build",
+  "outputDirectory": "Frontend/dist",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
