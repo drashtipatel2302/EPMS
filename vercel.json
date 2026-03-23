@@ -5,8 +5,7 @@
       "src": "Frontend/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "dist",
-        "buildCommand": "chmod -R 777 node_modules/.bin && npm run build"
+        "distDir": "dist"
       }
     }
   ],
