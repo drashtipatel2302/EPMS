@@ -40,7 +40,6 @@ async function loginAPI(email, password) {
   return data;
 }
 
-/* ── Floating stat chip ─────────────────────────────────────────────────── */
 function StatChip({ icon, label, value, color, animClass, style }) {
   return (
     <div className={animClass} style={{
@@ -100,6 +99,14 @@ export default function Login() {
   return (
     <>
       <style>{`
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body, #root {
+          width: 100%;
+          height: 100%;
+          overflow-x: hidden;
+        }
+
         @keyframes floatA {
           0%,100% { transform: translateY(0px) rotate(0deg); }
           33%      { transform: translateY(-3px) rotate(0.05deg); }
@@ -126,10 +133,6 @@ export default function Login() {
           from { opacity: 0; transform: translateX(30px); }
           to   { opacity: 1; transform: translateX(0); }
         }
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(60px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
         @keyframes slideUpFade {
           from { opacity: 0; transform: translateY(80px) scale(0.94); }
           to   { opacity: 1; transform: translateY(0) scale(1); }
@@ -150,32 +153,44 @@ export default function Login() {
         .slide-up-5 { animation: slideUpFade 1.2s cubic-bezier(0.16,1,0.3,1) 2.2s both; }
         .slide-up-6 { animation: slideUpFade 1.2s cubic-bezier(0.16,1,0.3,1) 2.6s both; }
 
-        .quick-btn { transition: all 0.18s ease !important; }
-        .quick-btn:hover { background: #f1f5f9 !important; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important; }
         .submit-btn { transition: all 0.18s ease; }
         .submit-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(79,70,229,0.4) !important; }
         .badge-pulse { animation: shimmer 20s ease-in-out infinite; }
 
+        .login-wrapper {
+          width: 100vw;
+          height: 100vh;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          overflow: hidden;
+        }
+
         @media (max-width: 768px) {
-          .login-grid { grid-template-columns: 1fr !important; }
+          .login-wrapper {
+            grid-template-columns: 1fr !important;
+            height: auto;
+            min-height: 100vh;
+          }
           .left-panel { display: none !important; }
-          .right-panel { padding: 40px 24px !important; min-height: 100vh; }
+          .right-panel {
+            padding: 40px 24px !important;
+            min-height: 100vh;
+            width: 100vw !important;
+          }
           .login-form-inner { max-width: 100% !important; }
         }
       `}</style>
 
-      <div className="login-grid" style={{
-        minHeight: '100vh', display: 'grid', gridTemplateColumns: '1fr 1fr',
-        fontFamily: 'var(--font-body)', background: '#f5f6fa',
-      }}>
+      <div className="login-wrapper">
 
-        {/* ══ LEFT PANEL — Photo + animations ══════════════════════════════ */}
+        {/* ══ LEFT PANEL ══════════════════════════════════════════════════ */}
         <div className="left-panel" style={{
-          position: 'relative', overflow: 'hidden',
+          position: 'relative',
+          overflow: 'hidden',
           background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%)',
+          width: '100%',
+          height: '100%',
         }}>
-
-          {/* Team photo filling entire panel */}
           <img
             src={teamPhoto}
             alt="Team collaboration"
@@ -185,21 +200,17 @@ export default function Login() {
               objectFit: 'cover', objectPosition: 'center top',
             }}
           />
-
-          {/* Gradient overlay — dark top for logo, lighter bottom for chips */}
           <div style={{
             position: 'absolute', inset: 0,
             background: 'linear-gradient(180deg, rgba(15,12,60,0.82) 0%, rgba(15,12,60,0.35) 40%, rgba(15,12,60,0.55) 100%)',
           }}/>
-
-          {/* Subtle color tint */}
           <div style={{
             position: 'absolute', inset: 0,
             background: 'linear-gradient(135deg, rgba(79,70,229,0.25) 0%, transparent 60%)',
             mixBlendMode: 'overlay',
           }}/>
 
-          {/* ── Logo top-left ── */}
+          {/* Logo */}
           <div className="slide-up-0" style={{ position: 'absolute', top: 36, left: 44, zIndex: 20, display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{
               width: 42, height: 42, borderRadius: 13,
@@ -216,7 +227,7 @@ export default function Login() {
             </div>
           </div>
 
-          {/* ── Bottom text overlay ── */}
+          {/* Bottom text */}
           <div style={{ position: 'absolute', bottom: 44, left: 44, right: 44, zIndex: 20 }}>
             <div className="slide-up-2" style={{
               fontWeight: 700, fontSize: 28, color: '#fff',
@@ -228,8 +239,6 @@ export default function Login() {
             <p className="slide-up-3" style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', lineHeight: 1.7, margin: 0, maxWidth: 300, textShadow: '0 1px 6px rgba(0,0,0,0.3)' }}>
               Track performance, attendance, appraisals, and team goals — all in one unified platform.
             </p>
-
-            {/* Stats row */}
             <div style={{ display: 'flex', gap: 12, marginTop: 22 }}>
               {[{ v:'50+', l:'Employees' }, { v:'5+', l:'Departments' }, { v:'99.9%', l:'Uptime' }].map((s, i) => (
                 <div key={s.l} className={`slide-up-${4 + i}`} style={{
@@ -247,24 +256,12 @@ export default function Login() {
             </div>
           </div>
 
-          {/* ── Floating stat chips ── */}
-          <StatChip
-            icon="📈" label="Productivity Up" value="+24% this month"
-            color="#4f46e5" animClass="chip-a slide-up-1"
-            style={{ top: '28%', right: 28 }}
-          />
-          <StatChip
-            icon="✅" label="Tasks Completed" value="1,247 tasks"
-            color="#10b981" animClass="chip-b slide-up-2"
-            style={{ top: '46%', left: 24 }}
-          />
-          <StatChip
-            icon="⭐" label="Avg Performance" value="4.8 / 5.0"
-            color="#f59e0b" animClass="chip-c slide-up-3"
-            style={{ top: '63%', right: 20 }}
-          />
+          {/* Floating chips */}
+          <StatChip icon="📈" label="Productivity Up" value="+24% this month" color="#4f46e5" animClass="chip-a slide-up-1" style={{ top: '28%', right: 28 }} />
+          <StatChip icon="✅" label="Tasks Completed" value="1,247 tasks" color="#10b981" animClass="chip-b slide-up-2" style={{ top: '46%', left: 24 }} />
+          <StatChip icon="⭐" label="Avg Performance" value="4.8 / 5.0" color="#f59e0b" animClass="chip-c slide-up-3" style={{ top: '63%', right: 20 }} />
 
-          {/* ── Live badge ── */}
+          {/* Live badge */}
           <div className="badge-pulse slide-up-0" style={{
             position: 'absolute', top: 44, right: 44, zIndex: 20,
             display: 'flex', alignItems: 'center', gap: 7,
@@ -277,22 +274,24 @@ export default function Login() {
           </div>
         </div>
 
-        {/* ══ RIGHT PANEL — Login form ══════════════════════════════════════ */}
+        {/* ══ RIGHT PANEL ══════════════════════════════════════════════════ */}
         <div className="right-panel" style={{
-          display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start',
+          display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
           padding: '48px 64px',
           background: 'linear-gradient(160deg, #f8faff 0%, #ffffff 50%, #f3f0ff 100%)',
           boxShadow: '-4px 0 40px rgba(79,70,229,0.08)',
           position: 'relative', overflow: 'hidden',
+          width: '100%',
+          height: '100%',
+          overflowY: 'auto',
         }}>
-
           {/* Decorative blobs */}
           <div style={{ position:'absolute', top:-80, right:-80, width:260, height:260, borderRadius:'50%', background:'radial-gradient(circle, rgba(79,70,229,0.08) 0%, transparent 70%)', pointerEvents:'none' }}/>
           <div style={{ position:'absolute', bottom:-60, left:-60, width:220, height:220, borderRadius:'50%', background:'radial-gradient(circle, rgba(139,92,246,0.07) 0%, transparent 70%)', pointerEvents:'none' }}/>
 
           <div className="login-form-inner" style={{ maxWidth: 400, width: '100%', position:'relative', zIndex:1 }}>
 
-            {/* ── Brand mark ── */}
+            {/* Brand mark */}
             <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:32 }}>
               <div style={{
                 width:40, height:40, borderRadius:12,
@@ -304,7 +303,7 @@ export default function Login() {
               <div style={{ fontSize:17, fontWeight:800, color:'#1e1b4b', letterSpacing:-0.3 }}>PerformIQ</div>
             </div>
 
-            {/* ── Heading ── */}
+            {/* Heading */}
             <div style={{ marginBottom:28 }}>
               <h2 style={{
                 fontWeight:900, fontSize:38, margin:'0 0 8px',
@@ -337,25 +336,23 @@ export default function Login() {
               </div>
             )}
 
-            {/* ── Form ── */}
+            {/* Form */}
             <form onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:18 }}>
 
-              {/* Email field */}
+              {/* Email */}
               <div>
                 <label style={{ display:'flex', alignItems:'center', gap:6, fontSize:11.5, fontWeight:700, color:'#475569', textTransform:'uppercase', letterSpacing:1, marginBottom:8 }}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" strokeWidth="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                   Email Address
                 </label>
-                <div style={{ position:'relative' }}>
-                  <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@company.com"
-                    style={{ width:'100%', background:'#fff', border:'2px solid #e2e8f0', borderRadius:12, padding:'13px 16px', fontSize:14, color:'#0f172a', outline:'none', boxSizing:'border-box', transition:'all 0.2s', fontWeight:500 }}
-                    onFocus={e => { e.target.style.borderColor='#4f46e5'; e.target.style.boxShadow='0 0 0 4px rgba(79,70,229,0.10)'; e.target.style.background='#fafbff'; }}
-                    onBlur={e  => { e.target.style.borderColor='#e2e8f0'; e.target.style.boxShadow='none'; e.target.style.background='#fff'; }}
-                  />
-                </div>
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@company.com"
+                  style={{ width:'100%', background:'#fff', border:'2px solid #e2e8f0', borderRadius:12, padding:'13px 16px', fontSize:14, color:'#0f172a', outline:'none', boxSizing:'border-box', transition:'all 0.2s', fontWeight:500 }}
+                  onFocus={e => { e.target.style.borderColor='#4f46e5'; e.target.style.boxShadow='0 0 0 4px rgba(79,70,229,0.10)'; e.target.style.background='#fafbff'; }}
+                  onBlur={e  => { e.target.style.borderColor='#e2e8f0'; e.target.style.boxShadow='none'; e.target.style.background='#fff'; }}
+                />
               </div>
 
-              {/* Password field */}
+              {/* Password */}
               <div>
                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
                   <label style={{ display:'flex', alignItems:'center', gap:6, fontSize:11.5, fontWeight:700, color:'#475569', textTransform:'uppercase', letterSpacing:1 }}>
@@ -379,7 +376,7 @@ export default function Login() {
                 </div>
               </div>
 
-              {/* Sign In button */}
+              {/* Submit */}
               <button type="submit" className="submit-btn" disabled={loading} style={{
                 marginTop:4, padding:'14px',
                 background: loading ? '#c7d2fe' : 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
@@ -388,7 +385,7 @@ export default function Login() {
                 cursor: loading ? 'not-allowed' : 'pointer',
                 boxShadow: loading ? 'none' : '0 6px 20px rgba(79,70,229,0.45)',
                 display:'flex', alignItems:'center', justifyContent:'center', gap:10,
-                letterSpacing:0.3,
+                letterSpacing:0.3, width:'100%',
               }}>
                 {loading
                   ? <><span style={{ width:14, height:14, border:'2px solid rgba(255,255,255,0.35)', borderTopColor:'#fff', borderRadius:'50%', display:'inline-block', animation:'spin 0.7s linear infinite' }}/> Signing in...</>
@@ -398,10 +395,8 @@ export default function Login() {
                 }
               </button>
             </form>
-
           </div>
         </div>
-
       </div>
     </>
   );
