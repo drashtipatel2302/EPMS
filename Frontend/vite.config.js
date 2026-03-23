@@ -11,16 +11,4 @@ export default defineConfig({
       },
     },
   },
-  esbuild: {
-    // This tells Vite to treat .js files as JSX too (fallback fix)
-    loader: 'jsx',
-    include: /src\/.*\.[jt]sx?$/,
-  },
-  optimizeDeps: {
-    esbuildOptions: {
-      loader: {
-        '.js': 'jsx',
-      },
-    },
-  },
 })
