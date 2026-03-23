@@ -1,0 +1,79 @@
+.sidebar {
+  width: 240px;
+  min-width: 240px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.logo {
+  padding: 28px 24px 20px;
+  font-family: var(--font-head);
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: .05em;
+  color: #fff;
+  border-bottom: 1px solid var(--border);
+}
+.accent { color: var(--accent); }
+
+.userBadge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: .85rem; color: #fff; flex-shrink: 0;
+  font-family: var(--font-head);
+}
+.userName { font-size: .9rem; font-weight: 600; }
+.userRole { font-size: .7rem; color: var(--muted); margin-top: 2px; }
+
+.nav { padding: 16px 12px; flex: 1; }
+
+.navSection {
+  font-size: .63rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  color: var(--muted);
+  text-transform: uppercase;
+  padding: 12px 12px 6px;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: .88rem;
+  color: var(--muted);
+  transition: all .2s;
+  margin-bottom: 2px;
+}
+.navItem:hover { background: var(--surface2); color: var(--text); }
+.navItem.active { background: rgba(79,124,255,.15); color: var(--accent); }
+
+.icon { font-size: 1rem; width: 18px; text-align: center; }
+
+.badge {
+  margin-left: auto;
+  background: var(--accent);
+  color: #fff;
+  font-size: .65rem;
+  padding: 2px 7px;
+  border-radius: 20px;
+}
+.badgeWarn { background: var(--warn); }

@@ -1,0 +1,93 @@
+const Promotion = require("../models/PromotionModel");
+const UserModel = require("../models/UserModel");
+
+// ===============================
+// MANAGER: Recommend Promotion/Increment
+// ===============================
+exports.recommendPromotion = async (req, res) => {
+  try {
+    const {
+      employee,
+      type,
+      currentDesignation,
+      proposedDesignation,
+      currentCTC,
+      incrementPercent,
+      justification,
+    } = req.body;
+
+    const emp = await UserModel.findById(employee);
+    if (!emp || emp.department !== req.user.department) {
+      return res
+        .status(403)
+        .json({ message: "Employee not in your department" });
+    }
+
+    const promotion = await Promotion.create({
+      employee,
+      recommendedBy: req.user.id,
+      type,
+      currentDesignation,
+      proposedDesignation,
+      currentCTC,
+      incrementPercent,
+      justification,
+    });
+
+    await promotion.populate("employee", "name designation");
+    await promotion.populate("recommendedBy", "name");
+
+    res.status(201).json({ message: "Promotion recommended to HR", promotion });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ===============================
+// MANAGER: Get promotion history for their team
+// ===============================
+exports.getTeamPromotions = async (req, res) => {
+  try {
+    const promotions = await Promotion.find({ recommendedBy: req.user.id })
+      .populate("employee", "name designation department")
+      .populate("recommendedBy", "name")
+      .sort({ createdAt: -1 });
+
+    res.json(promotions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ===============================
+// HR/ADMIN: Get all promotions
+// ===============================
+exports.getAllPromotions = async (req, res) => {
+  try {
+    const promotions = await Promotion.find()
+      .populate("employee", "name designation department")
+      .populate("recommendedBy", "name")
+      .sort({ createdAt: -1 });
+    res.json(promotions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ===============================
+// HR/ADMIN: Review (approve/reject) promotion
+// ===============================
+exports.reviewPromotion = async (req, res) => {
+  try {
+    const { status, hrRemarks } = req.body;
+    const promotion = await Promotion.findById(req.params.id);
+    if (!promotion) return res.status(404).json({ message: "Promotion not found" });
+    promotion.status = status;
+    if (hrRemarks) promotion.hrRemarks = hrRemarks;
+    promotion.reviewedBy = req.user.id;
+    await promotion.save();
+    res.json({ message: "Promotion reviewed", promotion });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
