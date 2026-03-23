@@ -1,0 +1,112 @@
+import React, { useEffect, useState } from 'react';
+import Layout from '../../components/Layout';
+import { StatCard, Card, SectionHeader, Badge, ProgressBar, Sparkline } from '../../components/UI';
+import Loader from '../../components/Loader';
+import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
+
+export default function EmployeeDashboard() {
+  const [goals, setGoals] = useState([]);
+  const [data, setData] = useState(null);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    Promise.all([api.getGoals(), api.getChartData()]).then(([g, c]) => {
+      setGoals(g); setData(c);
+    });
+  }, []);
+
+  if (!data) return <Layout><Loader /></Layout>;
+
+  const completedGoals = goals.filter(g => g.progress === 100).length;
+  const avgProgress = Math.round(goals.reduce((s, g) => s + g.progress, 0) / goals.length);
+
+  return (
+    <Layout>
+      <div style={{ maxWidth: 1100 }}>
+        {/* Greeting Banner */}
+        <div style={{
+          background: 'linear-gradient(120deg, rgba(108,99,255,0.2) 0%, rgba(255,101,132,0.1) 100%)',
+          border: '1px solid rgba(108,99,255,0.2)',
+          borderRadius: 'var(--r-xl)',
+          padding: '24px 28px',
+          marginBottom: 24,
+          position: 'relative', overflow: 'hidden',
+        }}>
+          <div style={{ position: 'absolute', right: 24, top: '50%', transform: 'translateY(-50%)', fontSize: 72, opacity: 0.1 }}>🚀</div>
+          <div style={{ fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: 22, color: 'var(--text-primary)' }}>
+            Good morning, {user?.name?.split(' ')[0]}! 👋
+          </div>
+          <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginTop: 4 }}>
+            You have <strong style={{ color: '#FFB547' }}>3 goals in progress</strong> and your Q4 self-review is due in 5 days.
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
+          <StatCard label="Active Goals"    value={goals.length}     icon="🎯" color="#6C63FF" delay={0.05} />
+          <StatCard label="Avg Progress"    value={`${avgProgress}%`} icon="📈" color="#43E8AC" trend={5} delay={0.10} />
+          <StatCard label="My Score"        value="76"               icon="⭐" color="#FFB547" trend={3} delay={0.15} />
+          <StatCard label="Reviews Done"    value="1"                icon="📝" color="#FF6584" delay={0.20} />
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 16 }}>
+          {/* Goals */}
+          <Card>
+            <SectionHeader title="My Goals" subtitle={`${goals.length} assigned goals`} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {goals.map(g => (
+                <div key={g.id} style={{
+                  padding: '12px 14px',
+                  background: 'var(--bg-elevated)', borderRadius: 'var(--r-md)',
+                  border: '1px solid var(--border)',
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--text-primary)' }}>{g.title}</div>
+                    <div style={{ display: 'flex', gap: 5 }}>
+                      <Badge status={g.priority} />
+                      <Badge status={g.status} />
+                    </div>
+                  </div>
+                  <ProgressBar value={g.progress} showLabel />
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>Due: {g.due}</div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Right column */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {/* Performance */}
+            <Card>
+              <SectionHeader title="My Performance" subtitle="6-month trend" />
+              <Sparkline data={data.performance} color="#FFB547" height={80} />
+            </Card>
+
+            {/* Upcoming */}
+            <Card>
+              <SectionHeader title="Upcoming" subtitle="Deadlines & events" />
+              {[
+                { event: 'Q4 Self Review Due',       date: 'Feb 28', color: '#FF6584' },
+                { event: '1-on-1 with Jordan Blake',  date: 'Mar 5',  color: '#6C63FF' },
+                { event: 'Goal: API Performance due', date: 'Mar 10', color: '#FFB547' },
+                { event: 'Annual Appraisal',          date: 'Mar 15', color: '#43E8AC' },
+              ].map((e, i) => (
+                <div key={i} style={{
+                  display: 'flex', gap: 10, alignItems: 'center',
+                  padding: '9px 0', borderBottom: '1px solid var(--border)',
+                }}>
+                  <div style={{ width: 4, height: 32, borderRadius: 2, background: e.color, flexShrink: 0 }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-primary)' }}>{e.event}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{e.date}</div>
+                  </div>
+                </div>
+              ))}
+            </Card>
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
+}

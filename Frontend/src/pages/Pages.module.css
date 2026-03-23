@@ -1,0 +1,51 @@
+.page { animation: fadeIn .3s ease; }
+
+/* KPI GRID */
+.kpiGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 16px; margin-bottom: 28px; }
+
+/* TWO COLUMN */
+.twoCol { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 900px) { .twoCol { grid-template-columns: 1fr; } }
+
+/* PROJECT (dashboard) */
+.projItem { padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,.04); }
+.projItem:last-child { border-bottom: none; }
+.projRow { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.projName { font-weight: 600; font-size: .9rem; }
+
+/* LEAVE (dashboard) */
+.leaveItem { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,.04); }
+.leaveItem:last-child { border-bottom: none; }
+.leaveInfo { display: flex; gap: 12px; align-items: center; }
+.leaveName { font-weight: 500; font-size: .9rem; }
+.leaveDates { color: var(--muted); font-size: .78rem; margin-top: 2px; }
+.leaveReason { color: var(--muted); font-size: .75rem;  margin-top: 1px; }
+.leaveActions { display: flex; gap: 8px; }
+.empty { color: var(--muted); font-size: .88rem; text-align: center; padding: 20px 0; }
+
+/* EMPLOYEE GRID */
+.empGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.empCard { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; transition: border-color .2s; }
+.empCard:hover { border-color: rgba(79,124,255,.3); }
+.empCardTop { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.empName { font-weight: 600; font-size: .95rem; }
+.empRole { color: var(--muted); font-size: .78rem; margin-top: 2px; }
+.empStats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.empStat { background: var(--surface2); border-radius: 8px; padding: 10px; text-align: center; }
+.empStatVal { font-family: var(--font-head); font-size: 1.1rem; font-weight: 700; }
+.empStatLbl { color: var(--muted); font-size: .68rem; margin-top: 2px; }
+.empActions { display: flex; gap: 8px; margin-top: 14px; }
+
+/* FORM */
+.formGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 700px) { .formGrid { grid-template-columns: 1fr; } }
+.formActions { display: flex; gap: 10px; margin-top: 16px; }
+
+/* PROJECTS PAGE GRID */
+.projGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+.projCard { transition: border-color .2s; }
+.projCard:hover { border-color: rgba(79,124,255,.3); }
+.projDue { color: var(--muted); font-size: .8rem; margin-bottom: 14px; margin-top: -8px; }
+.projProgress { display: flex; justify-content: space-between; font-size: .85rem; margin-bottom: 4px; }
+.projTeam { margin-top: 16px; font-size: .8rem; color: var(--muted); }
+.projActions { display: flex; gap: 8px; margin-top: 14px; }

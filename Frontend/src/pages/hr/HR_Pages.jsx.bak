@@ -1,0 +1,234 @@
+import React, { useState, useEffect } from 'react';
+import Layout from '../../components/Layout';
+import { StatCard, Card, SectionHeader, Badge, Button, ProgressBar, BarChart } from '../../components/UI';
+import Loader from '../../components/Loader';
+import api from '../../services/api';
+
+// ─── HR Dashboard ─────────────────────────────────────────────────────────────
+export function HRDashboard() {
+  const [data, setData] = useState(null);
+  const [appraisals, setAppraisals] = useState([]);
+
+  useEffect(() => {
+    Promise.all([api.getChartData(), api.getAppraisals()]).then(([c, a]) => {
+      setData(c); setAppraisals(a);
+    });
+  }, []);
+
+  if (!data) return <Layout><Loader /></Layout>;
+
+  return (
+    <Layout>
+      <div style={{ maxWidth: 1100 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
+          <StatCard label="Appraisals Due"    value="12"  icon="📋" color="#FF6584" trend={-3}  delay={0.05} />
+          <StatCard label="Promotions Pending" value="3"  icon="🚀" color="#6C63FF" delay={0.10} />
+          <StatCard label="Avg Salary Raise"  value="8.4%"icon="💰" color="#43E8AC" trend={1}   delay={0.15} />
+          <StatCard label="Retention Rate"    value="89%" icon="🔒" color="#FFB547" trend={2}   delay={0.20} />
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 16 }}>
+          <Card>
+            <SectionHeader title="Performance by Dept" subtitle="Avg scores" />
+            <BarChart data={data.goalCompletion.map(d => ({ ...d, score: d.rate }))} color="#FF6584" height={130} />
+          </Card>
+
+          <Card>
+            <SectionHeader title="Recent Appraisals" />
+            {appraisals.slice(0, 4).map((a, i) => (
+              <div key={a.id} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                padding: '9px 0', borderBottom: i < 3 ? '1px solid var(--border)' : 'none',
+              }}>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--text-primary)' }}>{a.employee}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{a.type} · Due {a.due}</div>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  {a.raise && <span style={{ fontSize: 13, fontWeight: 700, color: '#43E8AC' }}>{a.raise}</span>}
+                  <Badge status={a.status} />
+                </div>
+              </div>
+            ))}
+          </Card>
+
+          {/* Quick actions */}
+          <Card style={{ gridColumn: 'span 2' }}>
+            <SectionHeader title="Quick Actions" />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+              {[
+                { label: 'Start Appraisal Cycle', icon: '📋', color: '#6C63FF' },
+                { label: 'Generate Reports', icon: '📊', color: '#43E8AC' },
+                { label: 'Review Promotions', icon: '🚀', color: '#FF6584' },
+                { label: 'Send Reminders', icon: '🔔', color: '#FFB547' },
+              ].map((a, i) => (
+                <button key={i} style={{
+                  padding: '16px 12px',
+                  background: `${a.color}12`, border: `1px solid ${a.color}25`,
+                  borderRadius: 'var(--r-md)', cursor: 'pointer',
+                  textAlign: 'center', transition: 'all 0.15s',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = `${a.color}22`}
+                onMouseLeave={e => e.currentTarget.style.background = `${a.color}12`}
+                >
+                  <div style={{ fontSize: 24, marginBottom: 8 }}>{a.icon}</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: a.color }}>{a.label}</div>
+                </button>
+              ))}
+            </div>
+          </Card>
+        </div>
+      </div>
+    </Layout>
+  );
+}
+
+// ─── Appraisal ────────────────────────────────────────────────────────────────
+export function Appraisal() {
+  const [appraisals, setAppraisals] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => { api.getAppraisals().then(a => { setAppraisals(a); setLoading(false); }); }, []);
+  if (loading) return <Layout><Loader /></Layout>;
+
+  return (
+    <Layout>
+      <div style={{ maxWidth: 1000 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+          <div>
+            <h2 style={{ fontFamily: 'var(--font-body)', fontWeight: 500, fontSize: 18, color: 'var(--text-primary)' }}>
+              Appraisals
+            </h2>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>Manage salary reviews and appraisal cycles</p>
+          </div>
+          <Button variant="primary">+ Start New Cycle</Button>
+        </div>
+
+        <Card>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                {['Employee','Type','Due Date','Status','Raise','Actions'].map(h => (
+                  <th key={h} style={{ padding: '10px 12px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.8 }}>
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {appraisals.map((a, i) => (
+                <tr key={a.id}
+                  style={{ borderBottom: '1px solid var(--border)' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  <td style={{ padding: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <div style={{
+                        width: 32, height: 32, borderRadius: 9,
+                        background: 'rgba(255,101,132,0.15)', border: '1px solid rgba(255,101,132,0.25)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontWeight: 700, fontSize: 11, color: '#FF6584',
+                      }}>
+                        {a.employee.split(' ').map(n => n[0]).join('')}
+                      </div>
+                      <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--text-primary)' }}>{a.employee}</span>
+                    </div>
+                  </td>
+                  <td style={{ padding: '12px', fontSize: 13, color: 'var(--text-secondary)' }}>{a.type}</td>
+                  <td style={{ padding: '12px', fontSize: 13, color: 'var(--text-secondary)' }}>{a.due}</td>
+                  <td style={{ padding: '12px' }}><Badge status={a.status} /></td>
+                  <td style={{ padding: '12px', fontFamily: 'var(--font-body)', fontWeight: 500, color: a.raise ? '#43E8AC' : 'var(--text-muted)', fontSize: 14 }}>
+                    {a.raise || '—'}
+                  </td>
+                  <td style={{ padding: '12px' }}>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <Button variant={a.status === 'completed' ? 'secondary' : 'primary'} size="sm">
+                        {a.status === 'completed' ? 'Review' : 'Process'}
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Card>
+      </div>
+    </Layout>
+  );
+}
+
+// ─── Promotions ───────────────────────────────────────────────────────────────
+export function Promotions() {
+  const [promos, setPromos] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => { api.getPromotions().then(p => { setPromos(p); setLoading(false); }); }, []);
+  if (loading) return <Layout><Loader /></Layout>;
+
+  return (
+    <Layout>
+      <div style={{ maxWidth: 900 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+          <div>
+            <h2 style={{ fontFamily: 'var(--font-body)', fontWeight: 500, fontSize: 18, color: 'var(--text-primary)' }}>
+              Promotions
+            </h2>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
+              Manage promotion requests and approvals
+            </p>
+          </div>
+          <Button variant="primary">+ Nominate Employee</Button>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {promos.map(p => (
+            <Card key={p.id} style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
+              {/* Avatar */}
+              <div style={{
+                width: 50, height: 50, borderRadius: 14, flexShrink: 0,
+                background: 'linear-gradient(135deg, rgba(108,99,255,0.25), rgba(67,232,172,0.15))',
+                border: '1px solid rgba(108,99,255,0.3)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: 16, color: '#6C63FF',
+              }}>
+                {p.employee.split(' ').map(n => n[0]).join('')}
+              </div>
+
+              {/* Info */}
+              <div style={{ flex: 1 }}>
+                <div style={{ fontFamily: 'var(--font-body)', fontWeight: 500, fontSize: 15, color: 'var(--text-primary)', marginBottom: 4 }}>
+                  {p.employee}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text-secondary)' }}>
+                  <span>{p.from}</span>
+                  <span style={{ color: '#6C63FF' }}>→</span>
+                  <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{p.to}</span>
+                </div>
+              </div>
+
+              {/* Score */}
+              <div style={{ textAlign: 'center', minWidth: 80 }}>
+                <div style={{ fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: 24, color: p.score >= 80 ? '#43E8AC' : '#FFB547' }}>
+                  {p.score}
+                </div>
+                <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.8 }}>Score</div>
+                <ProgressBar value={p.score} max={100} height={4} />
+              </div>
+
+              {/* Status & actions */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
+                <Badge status={p.status} />
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {p.status !== 'approved' && <Button variant="success" size="sm">Approve</Button>}
+                  {p.status !== 'approved' && <Button variant="danger" size="sm">Decline</Button>}
+                  {p.status === 'approved' && <Button variant="secondary" size="sm">View Letter</Button>}
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </Layout>
+  );
+}
