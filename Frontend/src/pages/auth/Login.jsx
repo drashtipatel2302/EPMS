@@ -1,5 +1,5 @@
-import api from '../../api/api.js'
 import React, { useState } from 'react';
+import api from '../../api/api.js';
 import teamPhoto from '../../assets/teamPhoto.js';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
