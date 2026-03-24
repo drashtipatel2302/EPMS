@@ -2,6 +2,8 @@
 
 const delay = (ms = 400) => new Promise(r => setTimeout(r, ms));
 
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 // ─── Mock Data ────────────────────────────────────────────────────────────────
 
 export const mockUsers = [
@@ -171,14 +173,14 @@ export const getAuthHeaders = () => ({
 
 export const fetchEmployees = async ({ page = 1, limit = 10, search = '' } = {}) => {
   const params = new URLSearchParams({ page, limit, search });
-  const res = await fetch(`/api/auth/employees?${params}`, { headers: getAuthHeaders() });
+  const res = await fetch(`${BASE_URL}/api/auth/employees?${params}`, { headers: getAuthHeaders() });
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || 'Failed to fetch employees');
   return data;
 };
 
 export const addEmployee = async (payload) => {
-  const res = await fetch('/api/auth/add-employee', {
+  const res = await fetch(`${BASE_URL}/api/auth/add-employee`, {
     method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(payload),
   });
   const data = await res.json();
@@ -187,7 +189,7 @@ export const addEmployee = async (payload) => {
 };
 
 export const updateEmployee = async (id, payload) => {
-  const res = await fetch(`/api/auth/employees/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/auth/employees/${id}`, {
     method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(payload),
   });
   const data = await res.json();
@@ -198,14 +200,14 @@ export const updateEmployee = async (id, payload) => {
 // ─── Real backend: Departments ────────────────────────────────────────────────
 
 export const fetchDepartments = async () => {
-  const res = await fetch('/api/departments', { headers: getAuthHeaders() });
+  const res = await fetch(`${BASE_URL}/api/departments`, { headers: getAuthHeaders() });
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || 'Failed to fetch departments');
   return data;
 };
 
 export const createDepartment = async (payload) => {
-  const res = await fetch('/api/departments', {
+  const res = await fetch(`${BASE_URL}/api/departments`, {
     method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(payload),
   });
   const data = await res.json();
@@ -214,7 +216,7 @@ export const createDepartment = async (payload) => {
 };
 
 export const editDepartment = async (id, payload) => {
-  const res = await fetch(`/api/departments/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/departments/${id}`, {
     method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(payload),
   });
   const data = await res.json();
@@ -223,7 +225,7 @@ export const editDepartment = async (id, payload) => {
 };
 
 export const removeDepartment = async (id) => {
-  const res = await fetch(`/api/departments/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/departments/${id}`, {
     method: 'DELETE', headers: getAuthHeaders(),
   });
   const data = await res.json();
@@ -238,7 +240,7 @@ export const removeDepartment = async (id) => {
  * Body: { title, description, assignedTo, priority, dueDate }
  */
 export const assignTask = async (payload) => {
-  const res = await fetch('/api/tasks/assign', {
+  const res = await fetch(`${BASE_URL}/api/tasks/assign`, {
     method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(payload),
   });
   const data = await res.json();
@@ -253,7 +255,7 @@ export const assignTask = async (payload) => {
  * and assignedBy (name, role), sorted newest first.
  */
 export const getAssignedTasks = async () => {
-  const res = await fetch('/api/tasks', { headers: getAuthHeaders() });
+  const res = await fetch(`${BASE_URL}/api/tasks`, { headers: getAuthHeaders() });
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || 'Failed to fetch tasks');
   // Backend returns array directly
@@ -265,7 +267,7 @@ export const getAssignedTasks = async () => {
  * Body: { status }
  */
 export const updateAssignedTaskStatus = async (id, status) => {
-  const res = await fetch(`/api/tasks/${id}/status`, {
+  const res = await fetch(`${BASE_URL}/api/tasks/${id}/status`, {
     method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify({ status }),
   });
   const data = await res.json();
@@ -283,7 +285,7 @@ export const updateAssignedTaskStatus = async (id, status) => {
  * Returns { evaluations, summary } — company-wide performance data
  */
 export const submitPerformanceEvaluation = async (payload) => {
-  const res = await fetch('/api/performance/evaluate', {
+  const res = await fetch(`${BASE_URL}/api/performance/evaluate`, {
     method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(payload),
   });
   const data = await res.json();
@@ -292,7 +294,7 @@ export const submitPerformanceEvaluation = async (payload) => {
 };
 
 export const fetchAllPerformance = async () => {
-  const res = await fetch('/api/performance/all', { headers: getAuthHeaders() });
+  const res = await fetch(`${BASE_URL}/api/performance/all`, { headers: getAuthHeaders() });
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || 'Failed to fetch performance data');
   return data;
@@ -300,7 +302,7 @@ export const fetchAllPerformance = async () => {
 
 export const fetchManagers = async () => {
   const params = new URLSearchParams({ page: 1, limit: 100, search: '' });
-  const res = await fetch(`/api/auth/employees?${params}`, { headers: getAuthHeaders() });
+  const res = await fetch(`${BASE_URL}/api/auth/employees?${params}`, { headers: getAuthHeaders() });
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || 'Failed to fetch managers');
   const list = Array.isArray(data) ? data : data.employees || [];
@@ -341,21 +343,21 @@ export default api;
 // -- Appraisals --
 export const fetchAppraisals = async (params = {}) => {
   const q = new URLSearchParams(params);
-  const res = await fetch(`/api/hr/appraisals?${q}`, { headers: getAuthHeaders() });
+  const res = await fetch(`${BASE_URL}/api/hr/appraisals?${q}`, { headers: getAuthHeaders() });
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || 'Failed to fetch appraisals');
   return data;
 };
 
 export const fetchAppraisalDashboard = async () => {
-  const res = await fetch('/api/hr/appraisals/dashboard', { headers: getAuthHeaders() });
+  const res = await fetch(`${BASE_URL}/api/hr/appraisals/dashboard`, { headers: getAuthHeaders() });
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || 'Failed to fetch appraisal dashboard');
   return data;
 };
 
 export const createAppraisal = async (payload) => {
-  const res = await fetch('/api/hr/appraisals', {
+  const res = await fetch(`${BASE_URL}/api/hr/appraisals`, {
     method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(payload),
   });
   const data = await res.json();
@@ -364,7 +366,7 @@ export const createAppraisal = async (payload) => {
 };
 
 export const updateAppraisal = async (id, payload) => {
-  const res = await fetch(`/api/hr/appraisals/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/hr/appraisals/${id}`, {
     method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(payload),
   });
   const data = await res.json();
@@ -373,7 +375,7 @@ export const updateAppraisal = async (id, payload) => {
 };
 
 export const deleteAppraisal = async (id) => {
-  const res = await fetch(`/api/hr/appraisals/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/hr/appraisals/${id}`, {
     method: 'DELETE', headers: getAuthHeaders(),
   });
   const data = await res.json();
@@ -384,14 +386,14 @@ export const deleteAppraisal = async (id) => {
 // -- Salary --
 export const fetchSalaries = async (params = {}) => {
   const q = new URLSearchParams(params);
-  const res = await fetch(`/api/hr/salary?${q}`, { headers: getAuthHeaders() });
+  const res = await fetch(`${BASE_URL}/api/hr/salary?${q}`, { headers: getAuthHeaders() });
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || 'Failed to fetch salaries');
   return data;
 };
 
 export const createSalarySlip = async (payload) => {
-  const res = await fetch('/api/hr/salary', {
+  const res = await fetch(`${BASE_URL}/api/hr/salary`, {
     method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(payload),
   });
   const data = await res.json();
@@ -400,7 +402,7 @@ export const createSalarySlip = async (payload) => {
 };
 
 export const updateSalarySlip = async (id, payload) => {
-  const res = await fetch(`/api/hr/salary/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/hr/salary/${id}`, {
     method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(payload),
   });
   const data = await res.json();
@@ -409,7 +411,7 @@ export const updateSalarySlip = async (id, payload) => {
 };
 
 export const deleteSalarySlip = async (id) => {
-  const res = await fetch(`/api/hr/salary/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/hr/salary/${id}`, {
     method: 'DELETE', headers: getAuthHeaders(),
   });
   const data = await res.json();
@@ -420,14 +422,14 @@ export const deleteSalarySlip = async (id) => {
 // -- Grievances --
 export const fetchGrievances = async (params = {}) => {
   const q = new URLSearchParams(params);
-  const res = await fetch(`/api/hr/grievances?${q}`, { headers: getAuthHeaders() });
+  const res = await fetch(`${BASE_URL}/api/hr/grievances?${q}`, { headers: getAuthHeaders() });
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || 'Failed to fetch grievances');
   return data;
 };
 
 export const updateGrievanceStatus = async (id, payload) => {
-  const res = await fetch(`/api/hr/grievances/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/hr/grievances/${id}`, {
     method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(payload),
   });
   const data = await res.json();
@@ -436,7 +438,7 @@ export const updateGrievanceStatus = async (id, payload) => {
 };
 
 export const addGrievanceNote = async (id, notes) => {
-  const res = await fetch(`/api/hr/grievances/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/hr/grievances/${id}`, {
     method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify({ notes }),
   });
   const data = await res.json();
@@ -447,14 +449,14 @@ export const addGrievanceNote = async (id, notes) => {
 // -- Training --
 export const fetchTraining = async (params = {}) => {
   const q = new URLSearchParams(params);
-  const res = await fetch(`/api/hr/training?${q}`, { headers: getAuthHeaders() });
+  const res = await fetch(`${BASE_URL}/api/hr/training?${q}`, { headers: getAuthHeaders() });
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || 'Failed to fetch training');
   return data;
 };
 
 export const createTraining = async (payload) => {
-  const res = await fetch('/api/hr/training', {
+  const res = await fetch(`${BASE_URL}/api/hr/training`, {
     method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(payload),
   });
   const data = await res.json();
@@ -463,7 +465,7 @@ export const createTraining = async (payload) => {
 };
 
 export const respondToTraining = async (id, payload) => {
-  const res = await fetch(`/api/hr/training/${id}/respond`, {
+  const res = await fetch(`${BASE_URL}/api/hr/training/${id}/respond`, {
     method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(payload),
   });
   const data = await res.json();
@@ -472,7 +474,7 @@ export const respondToTraining = async (id, payload) => {
 };
 
 export const updateTrainingRecord = async (id, payload) => {
-  const res = await fetch(`/api/hr/training/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/hr/training/${id}`, {
     method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(payload),
   });
   const data = await res.json();
@@ -481,7 +483,7 @@ export const updateTrainingRecord = async (id, payload) => {
 };
 
 export const deleteTrainingRecord = async (id) => {
-  const res = await fetch(`/api/hr/training/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/hr/training/${id}`, {
     method: 'DELETE', headers: getAuthHeaders(),
   });
   const data = await res.json();
@@ -492,14 +494,14 @@ export const deleteTrainingRecord = async (id) => {
 // -- Recruitment --
 export const fetchRecruitment = async (params = {}) => {
   const q = new URLSearchParams(params);
-  const res = await fetch(`/api/hr/recruitment?${q}`, { headers: getAuthHeaders() });
+  const res = await fetch(`${BASE_URL}/api/hr/recruitment?${q}`, { headers: getAuthHeaders() });
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || 'Failed to fetch recruitment');
   return data;
 };
 
 export const createJobPosting = async (payload) => {
-  const res = await fetch('/api/hr/recruitment', {
+  const res = await fetch(`${BASE_URL}/api/hr/recruitment`, {
     method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(payload),
   });
   const data = await res.json();
@@ -508,7 +510,7 @@ export const createJobPosting = async (payload) => {
 };
 
 export const updateJobPosting = async (id, payload) => {
-  const res = await fetch(`/api/hr/recruitment/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/hr/recruitment/${id}`, {
     method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(payload),
   });
   const data = await res.json();
@@ -517,7 +519,7 @@ export const updateJobPosting = async (id, payload) => {
 };
 
 export const deleteJobPosting = async (id) => {
-  const res = await fetch(`/api/hr/recruitment/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/hr/recruitment/${id}`, {
     method: 'DELETE', headers: getAuthHeaders(),
   });
   const data = await res.json();
@@ -527,14 +529,14 @@ export const deleteJobPosting = async (id) => {
 
 // -- Applicants --
 export const fetchApplicants = async (jobId) => {
-  const res = await fetch(`/api/hr/recruitment/${jobId}/applicants`, { headers: getAuthHeaders() });
+  const res = await fetch(`${BASE_URL}/api/hr/recruitment/${jobId}/applicants`, { headers: getAuthHeaders() });
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || 'Failed to fetch applicants');
   return data;
 };
 
 export const addApplicant = async (jobId, payload) => {
-  const res = await fetch(`/api/hr/recruitment/${jobId}/applicants`, {
+  const res = await fetch(`${BASE_URL}/api/hr/recruitment/${jobId}/applicants`, {
     method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(payload),
   });
   const data = await res.json();
@@ -543,7 +545,7 @@ export const addApplicant = async (jobId, payload) => {
 };
 
 export const updateApplicant = async (jobId, applicantId, payload) => {
-  const res = await fetch(`/api/hr/recruitment/${jobId}/applicants/${applicantId}`, {
+  const res = await fetch(`${BASE_URL}/api/hr/recruitment/${jobId}/applicants/${applicantId}`, {
     method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(payload),
   });
   const data = await res.json();
@@ -552,7 +554,7 @@ export const updateApplicant = async (jobId, applicantId, payload) => {
 };
 
 export const deleteApplicant = async (jobId, applicantId) => {
-  const res = await fetch(`/api/hr/recruitment/${jobId}/applicants/${applicantId}`, {
+  const res = await fetch(`${BASE_URL}/api/hr/recruitment/${jobId}/applicants/${applicantId}`, {
     method: 'DELETE', headers: getAuthHeaders(),
   });
   const data = await res.json();
@@ -562,14 +564,14 @@ export const deleteApplicant = async (jobId, applicantId) => {
 
 // -- Leave Policies --
 export const fetchLeavePolicies = async () => {
-  const res = await fetch('/api/hr/leave-policies', { headers: getAuthHeaders() });
+  const res = await fetch(`${BASE_URL}/api/hr/leave-policies`, { headers: getAuthHeaders() });
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || 'Failed to fetch leave policies');
   return data;
 };
 
 export const createLeavePolicyAPI = async (payload) => {
-  const res = await fetch('/api/hr/leave-policies', {
+  const res = await fetch(`${BASE_URL}/api/hr/leave-policies`, {
     method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(payload),
   });
   const data = await res.json();
@@ -578,7 +580,7 @@ export const createLeavePolicyAPI = async (payload) => {
 };
 
 export const updateLeavePolicyAPI = async (id, payload) => {
-  const res = await fetch(`/api/hr/leave-policies/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/hr/leave-policies/${id}`, {
     method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(payload),
   });
   const data = await res.json();
@@ -587,7 +589,7 @@ export const updateLeavePolicyAPI = async (id, payload) => {
 };
 
 export const deleteLeavePolicyAPI = async (id) => {
-  const res = await fetch(`/api/hr/leave-policies/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/hr/leave-policies/${id}`, {
     method: 'DELETE', headers: getAuthHeaders(),
   });
   const data = await res.json();
@@ -598,14 +600,14 @@ export const deleteLeavePolicyAPI = async (id) => {
 // -- HR: All leave requests --
 export const fetchAllLeaveRequests = async (params = {}) => {
   const q = new URLSearchParams(params);
-  const res = await fetch(`/api/leave/all?${q}`, { headers: getAuthHeaders() });
+  const res = await fetch(`${BASE_URL}/api/leave/all?${q}`, { headers: getAuthHeaders() });
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || 'Failed to fetch leave requests');
   return data;
 };
 
 export const hrReviewLeave = async (id, payload) => {
-  const res = await fetch(`/api/leave/${id}/review`, {
+  const res = await fetch(`${BASE_URL}/api/leave/${id}/review`, {
     method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(payload),
   });
   const data = await res.json();
@@ -616,14 +618,14 @@ export const hrReviewLeave = async (id, payload) => {
 // -- HR: All attendance --
 export const fetchAllAttendanceHR = async (params = {}) => {
   const q = new URLSearchParams(params);
-  const res = await fetch(`/api/attendance/all?${q}`, { headers: getAuthHeaders() });
+  const res = await fetch(`${BASE_URL}/api/attendance/all?${q}`, { headers: getAuthHeaders() });
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || 'Failed to fetch attendance');
   return data;
 };
 
 export const manualMarkAttendance = async (payload) => {
-  const res = await fetch('/api/attendance/manual', {
+  const res = await fetch(`${BASE_URL}/api/attendance/manual`, {
     method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(payload),
   });
   const data = await res.json();

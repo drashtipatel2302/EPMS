@@ -6,7 +6,6 @@ const api = axios.create({
   baseURL: `${BASE_URL}/api`,
 })
 
-// Attach token to every request
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('epms_token')
   if (token) config.headers.Authorization = `Bearer ${token}`
