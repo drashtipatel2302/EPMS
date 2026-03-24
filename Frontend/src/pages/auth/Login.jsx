@@ -1,3 +1,4 @@
+import api from '../../api/api.js'
 import React, { useState } from 'react';
 import teamPhoto from '../../assets/teamPhoto.js';
 import { useNavigate, Link } from 'react-router-dom';
@@ -18,26 +19,14 @@ const ROLE_TO_ROUTE = {
 };
 
 async function loginAPI(email, password) {
-  let res;
   try {
-    res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-  } catch {
-    throw new Error('Cannot reach server — make sure the backend is running on port 3000.');
+    const { data } = await api.post('/auth/login', { email, password });
+    return data;
+  } catch (err) {
+    const msg = err.response?.data?.message;
+    if (!msg) throw new Error('Cannot reach server — make sure the backend is running.');
+    throw new Error(msg);
   }
-  const ct = res.headers.get('content-type') || '';
-  if (!ct.includes('application/json')) {
-    const text = await res.text();
-    throw new Error(res.status === 500 || !text
-      ? 'Backend crashed. Check MongoDB password and Atlas IP whitelist.'
-      : `Unexpected server response (${res.status}).`);
-  }
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || 'Invalid credentials');
-  return data;
 }
 
 function StatChip({ icon, label, value, color, animClass, style }) {
